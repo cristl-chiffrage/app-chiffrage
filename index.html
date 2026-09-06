@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
-  <title>MOE Chiffrage — Vérification & Estimation</title>
+  <title>MOE Chiffrage — Métré, BPU & Estimation</title>
   <style>
     * { box-sizing: border-box; }
 
@@ -538,6 +538,411 @@
     .summary-row.total { border-top:1px solid #c7d2fe; margin-top:7px; padding-top:13px; align-items:end; }
     .total-ttc { font-size:28px; line-height:1; font-weight:950; color:var(--primary); letter-spacing:-.04em; }
 
+
+    /* METRE & PRIX */
+    .meter-toolbar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin:18px 0 12px;
+      flex-wrap:wrap;
+    }
+    .meter-toolbar h4 { margin:0; font-size:15px; font-weight:900; }
+    .meter-toolbar p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+    .btn-secondary {
+      border:1px solid var(--line-strong);
+      background:white;
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 13px;
+      font-size:12px;
+      font-weight:850;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+    }
+    .btn-secondary:hover { border-color:#93c5fd; color:var(--primary); background:#f8fbff; }
+    .meter-list { display:grid; gap:14px; }
+    .meter-card {
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .meter-card-head {
+      padding:13px 14px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .meter-name-input {
+      border:0;
+      background:transparent;
+      padding:4px 0;
+      min-width:0;
+      width:100%;
+      font-weight:900;
+      color:var(--text);
+      outline:none;
+    }
+    .meter-name-input:focus { box-shadow:0 2px 0 var(--primary); }
+    .remove-line {
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:white;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      flex:0 0 auto;
+    }
+    .remove-line:hover { color:var(--danger); border-color:#fecaca; background:#fff7f7; }
+    .meter-card-body { padding:14px; }
+    .meter-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+    .meter-field { min-width:0; }
+    .meter-field.span-2 { grid-column:span 2; }
+    .meter-field label {
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      font-weight:850;
+      margin-bottom:5px;
+    }
+    .meter-input, .meter-select {
+      width:100%;
+      min-width:0;
+      border:1px solid var(--line-strong);
+      background:white;
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 10px;
+      outline:none;
+      font-size:13px;
+      font-weight:750;
+    }
+    .meter-input:focus, .meter-select:focus {
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(37,99,235,.10);
+    }
+    .meter-output {
+      min-height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:7px;
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      border-radius:10px;
+      padding:9px 10px;
+      font-weight:900;
+      color:#1e3a8a;
+    }
+    .meter-output.amount { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
+    .meter-unit-note { font-size:10px; opacity:.7; font-weight:800; }
+    .meter-formula {
+      margin-top:10px;
+      color:var(--muted);
+      font-size:11px;
+      display:flex;
+      gap:6px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .formula-chip {
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      background:#f1f5f9;
+      border:1px solid var(--line);
+      padding:5px 8px;
+      font-weight:800;
+      color:#475569;
+    }
+    .pricing-summary {
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr 220px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .tax-panel {
+      border:1px solid var(--line);
+      border-radius:15px;
+      background:#fff;
+      padding:14px;
+    }
+    .tax-panel label { display:block; font-size:11px; color:var(--muted); font-weight:850; margin-bottom:7px; }
+    .tax-row { display:flex; align-items:center; gap:8px; }
+    .tax-row input { width:100%; border:1px solid var(--line-strong); border-radius:10px; padding:10px; font-weight:850; }
+    .tax-row span { font-weight:900; color:var(--muted); }
+    .meter-empty { padding:18px; border:1px dashed var(--line-strong); border-radius:14px; text-align:center; color:var(--muted); font-size:12px; }
+
+    @media (max-width: 820px) {
+      .meter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .pricing-summary { grid-template-columns:1fr; }
+    }
+
+    @media (max-width: 460px) {
+      .meter-grid { grid-template-columns:1fr; }
+      .meter-field.span-2 { grid-column:span 1; }
+    }
+
+    /* BPU */
+    .bpu-banner {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:14px 16px;
+      margin-bottom:16px;
+      border:1px solid #dbeafe;
+      background:linear-gradient(135deg,#eff6ff,#f8fafc);
+      border-radius:15px;
+      flex-wrap:wrap;
+    }
+    .bpu-banner strong { display:block; font-size:13px; }
+    .bpu-banner span { display:block; color:var(--muted); font-size:11px; margin-top:2px; }
+    .bpu-status {
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:white;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:850;
+      white-space:nowrap;
+    }
+    .bpu-status.ready { color:#047857; background:#ecfdf5; border-color:#a7f3d0; }
+    .bpu-status.ready::before { content:''; width:7px; height:7px; border-radius:50%; background:#10b981; }
+    .bpu-help {
+      margin-top:12px;
+      padding:12px 13px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#f8fafc;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.55;
+    }
+    .bpu-toolbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:18px 0 10px;
+    }
+    .bpu-toolbar h3 { margin:0; font-size:15px; font-weight:900; }
+    .bpu-toolbar p { margin:3px 0 0; color:var(--muted); font-size:11px; }
+    .bpu-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .bpu-table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:15px; background:#fff; }
+    .bpu-table { width:100%; min-width:760px; border-collapse:collapse; }
+    .bpu-table th {
+      padding:10px;
+      background:#f8fafc;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      font-weight:900;
+    }
+    .bpu-table td { padding:8px; border-bottom:1px solid #eef2f7; vertical-align:middle; }
+    .bpu-table tr:last-child td { border-bottom:0; }
+    .bpu-input, .bpu-select {
+      width:100%;
+      min-width:0;
+      border:1px solid transparent;
+      background:transparent;
+      border-radius:9px;
+      padding:8px;
+      color:var(--text);
+      font-size:12px;
+      font-weight:700;
+      outline:none;
+    }
+    .bpu-input:focus, .bpu-select:focus { background:white; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.09); }
+    .bpu-price { text-align:right; font-weight:900; }
+    .bpu-delete { width:32px; height:32px; border-radius:9px; border:1px solid var(--line); background:white; color:var(--muted); cursor:pointer; font-size:17px; }
+    .bpu-delete:hover { color:var(--danger); border-color:#fecaca; background:#fff7f7; }
+    .bpu-empty { padding:24px; text-align:center; color:var(--muted); font-size:12px; }
+    .bpu-import-message { display:none; margin-top:12px; padding:11px 12px; border-radius:11px; font-size:11px; font-weight:750; }
+    .bpu-import-message.show { display:block; }
+    .bpu-import-message.ok { background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; }
+    .bpu-import-message.warn { background:#fff7ed; border:1px solid #fed7aa; color:#b45309; }
+    .bpu-ref-select { width:100%; border:1px solid #cbd5e1; background:white; border-radius:10px; padding:10px; font-size:12px; font-weight:750; color:var(--text); }
+    .bpu-source-line { margin-top:8px; display:flex; gap:7px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:10px; }
+    .bpu-source-chip { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:4px 7px; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; font-weight:850; }
+    .bpu-source-chip.manual { background:#f8fafc; border-color:var(--line); color:var(--muted); }
+    .bpu-col-code { width:120px; }
+    .bpu-col-unit { width:100px; }
+    .bpu-col-price { width:130px; }
+    .bpu-col-action { width:52px; text-align:center; }
+
+    @media (max-width: 640px) {
+      .workspace-nav { overflow-x:auto; }
+      .tab-btn { min-width:130px; }
+      .bpu-banner { align-items:flex-start; }
+    }
+
+
+    /* V7 — SUITE PRO */
+    .feature-strip {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+      margin:0 0 22px;
+    }
+    .feature-pill {
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:13px;
+      padding:10px 12px;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:750;
+    }
+    .feature-pill strong { display:block; color:var(--text); font-size:12px; margin-bottom:2px; }
+    .subsection {
+      margin-top:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:16px;
+    }
+    .subsection-head {
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      margin-bottom:13px; flex-wrap:wrap;
+    }
+    .subsection-head h3 { margin:0; font-size:14px; font-weight:900; }
+    .subsection-head p { margin:3px 0 0; color:var(--muted); font-size:11px; }
+    .cost-breakdown {
+      margin-top:13px;
+      border-top:1px dashed var(--line-strong);
+      padding-top:13px;
+    }
+    .cost-breakdown-head {
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .cost-breakdown-head strong { font-size:12px; }
+    .cost-toggle {
+      display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:800; color:var(--muted);
+    }
+    .cost-toggle input { width:16px; height:16px; accent-color:var(--primary); }
+    .cost-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .cost-result {
+      margin-top:10px; display:flex; justify-content:space-between; gap:12px; align-items:center;
+      background:#f8fafc; border:1px solid var(--line); border-radius:11px; padding:10px 12px; font-size:11px;
+    }
+    .cost-result strong { font-size:13px; color:var(--primary); }
+    .meter-status-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .tiny-select {
+      border:1px solid var(--line); border-radius:9px; padding:7px 9px; font-size:11px; font-weight:750; background:#fff;
+    }
+    .library-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .library-card {
+      border:1px solid var(--line); border-radius:15px; padding:15px; background:#fff;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .library-card-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .library-code { font-size:10px; font-weight:900; color:var(--primary); text-transform:uppercase; letter-spacing:.06em; }
+    .library-card h4 { margin:3px 0 0; font-size:14px; }
+    .library-meta { display:flex; gap:6px; flex-wrap:wrap; }
+    .library-meta span { border:1px solid var(--line); background:#f8fafc; border-radius:999px; padding:4px 7px; font-size:10px; color:var(--muted); font-weight:750; }
+    .library-costs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; font-size:10px; color:var(--muted); }
+    .library-costs strong { color:var(--text); }
+    .library-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; }
+    .project-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .form-field label { display:block; font-size:10px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+    .form-field input, .form-field select, .form-field textarea {
+      width:100%; border:1px solid var(--line-strong); border-radius:10px; padding:10px; background:#fff; color:var(--text); font-size:12px; outline:none;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+    .dqe-toolbar, .project-toolbar {
+      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin:16px 0 10px;
+    }
+    .table-shell { overflow-x:auto; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    .pro-table { width:100%; min-width:880px; border-collapse:collapse; }
+    .pro-table th {
+      background:#f8fafc; border-bottom:1px solid var(--line); padding:10px; text-align:left;
+      font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:900;
+    }
+    .pro-table td { padding:10px; border-bottom:1px solid #eef2f7; font-size:11px; vertical-align:top; }
+    .pro-table tr:last-child td { border-bottom:0; }
+    .pro-table .num { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .lot-row td { background:#f8fafc; font-weight:900; color:var(--text); }
+    .lot-total td { background:#fbfdff; font-weight:900; }
+    .grand-total td { background:#eff6ff; color:#1d4ed8; font-weight:950; }
+    .project-list { display:grid; gap:10px; }
+    .project-card {
+      border:1px solid var(--line); border-radius:14px; background:#fff; padding:14px;
+      display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center;
+    }
+    .project-card h4 { margin:0; font-size:14px; }
+    .project-card p { margin:4px 0 0; color:var(--muted); font-size:11px; }
+    .project-actions { display:flex; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+    .kpi-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:12px 0; }
+    .kpi {
+      border:1px solid var(--line); background:#fff; border-radius:13px; padding:12px;
+    }
+    .kpi span { display:block; color:var(--muted); font-size:10px; font-weight:800; margin-bottom:4px; }
+    .kpi strong { display:block; font-size:16px; }
+    .amendment-row { display:grid; grid-template-columns:120px 1fr 150px 42px; gap:8px; align-items:center; margin-bottom:8px; }
+    .amendment-row input, .amendment-row select { width:100%; border:1px solid var(--line); border-radius:9px; padding:9px; font-size:11px; }
+    .notice {
+      border:1px solid #dbeafe; background:#eff6ff; color:#1e40af; border-radius:12px; padding:11px 12px; font-size:11px; line-height:1.5;
+    }
+    .notice.warn { border-color:#fed7aa; background:#fff7ed; color:#9a3412; }
+    @media (max-width: 900px) {
+      .feature-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .cost-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .project-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .library-grid { grid-template-columns:1fr; }
+      .kpi-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 560px) {
+      .feature-strip, .project-form-grid, .cost-grid, .kpi-row { grid-template-columns:1fr; }
+      .amendment-row { grid-template-columns:1fr; }
+      .project-card { grid-template-columns:1fr; }
+      .project-actions { justify-content:flex-start; }
+    }
+    @media print {
+      body.print-dqe { background:#fff !important; }
+      body.print-dqe .topbar,
+      body.print-dqe .hero,
+      body.print-dqe .workspace-nav,
+      body.print-dqe #verify,
+      body.print-dqe #generate,
+      body.print-dqe #bpu,
+      body.print-dqe #library,
+      body.print-dqe #projects,
+      body.print-dqe .dqe-toolbar,
+      body.print-dqe .mode-chip { display:none !important; }
+      body.print-dqe .main { max-width:none; padding:0; }
+      body.print-dqe .workspace { border:0; box-shadow:none; }
+      body.print-dqe .workspace-body { padding:0; }
+      body.print-dqe #dqe { display:block !important; }
+      body.print-dqe .field-card, body.print-dqe .subsection { box-shadow:none; break-inside:avoid; }
+    }
+
     /* CAMERA */
     .camera-modal {
       display:none;
@@ -620,7 +1025,7 @@
         </div>
         <div class="brand-copy">
           <div class="brand-title">MOE Chiffrage</div>
-          <div class="brand-subtitle">Contrôle chantier & estimation assistée par IA</div>
+          <div class="brand-subtitle">Métré · BPU · ouvrages · DQE/DPGF · suivi projets</div>
         </div>
       </div>
       <div class="topbar-badge">Assistant prêt</div>
@@ -631,15 +1036,15 @@
     <section class="hero">
       <div class="hero-card">
         <div class="hero-kicker">IA · Chiffrage · Vérification terrain</div>
-        <h1>Contrôlez vos quantités.<br>Estimez plus vite.</h1>
-        <p>Importez un devis ou une photo de chantier et obtenez une lecture claire des écarts, quantités et montants à valider sur site.</p>
+        <h1>Mesurez, contrôlez.<br>Chiffrez avec votre BPU.</h1>
+        <p>Importez un devis, une photo et votre BPU. Métrés avancés, ouvrages composés, décomposition des coûts, DQE/DPGF et suivi des avenants réunis dans un même outil.</p>
       </div>
       <aside class="hero-side" aria-label="Fonctionnement">
         <div class="hero-side-title">Flux de travail</div>
         <div class="steps">
-          <div class="step"><div class="step-index">1</div><div><strong>Importez</strong><span>Document, photo ou capture caméra</span></div></div>
+          <div class="step"><div class="step-index">1</div><div><strong>Importez</strong><span>Document, photo, caméra ou BPU</span></div></div>
           <div class="step"><div class="step-index">2</div><div><strong>Analysez</strong><span>L’IA compare ou produit une estimation</span></div></div>
-          <div class="step"><div class="step-index">3</div><div><strong>Validez</strong><span>Contrôlez les résultats avant usage chantier</span></div></div>
+          <div class="step"><div class="step-index">3</div><div><strong>Chiffrez</strong><span>Appliquez votre BPU et validez les montants</span></div></div>
         </div>
       </aside>
     </section>
@@ -653,6 +1058,22 @@
         <button class="tab-btn" type="button" data-workflow="generate" onclick="switchWorkflow('generate', this)">
           <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/><path d="m5 5 14 14M19 5 5 19" opacity=".35"/></svg></span>
           Générer une estimation
+        </button>
+        <button class="tab-btn" type="button" data-workflow="bpu" onclick="switchWorkflow('bpu', this)">
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h4M15 13h1M8 17h3M14 17h2"/></svg></span>
+          BPU & prix
+        </button>
+        <button class="tab-btn" type="button" data-workflow="library" onclick="switchWorkflow('library', this)">
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>
+          Ouvrages
+        </button>
+        <button class="tab-btn" type="button" data-workflow="dqe" onclick="switchWorkflow('dqe', this); renderDqe();">
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+          DQE / DPGF
+        </button>
+        <button class="tab-btn" type="button" data-workflow="projects" onclick="switchWorkflow('projects', this); renderProjects();">
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg></span>
+          Projets & avenants
         </button>
       </nav>
 
@@ -766,6 +1187,14 @@
             </section>
           </div>
 
+          <div class="bpu-banner">
+            <div>
+              <strong>Source de prix du chiffrage</strong>
+              <span id="generate-bpu-copy">Aucun BPU chargé : les prix restent saisissables manuellement.</span>
+            </div>
+            <button class="bpu-status" id="generate-bpu-status" type="button" onclick="switchWorkflow('bpu', document.querySelector('[data-workflow=\'bpu\']'))">Configurer le BPU</button>
+          </div>
+
           <div class="action-bar">
             <div class="action-hint">L’estimation générée reste indicative et doit être validée sur site.</div>
             <button class="btn-primary" onclick="generateEstimate()" id="generate-btn" type="button">
@@ -775,6 +1204,156 @@
           </div>
 
           <div id="generate-results" class="results"></div>
+        </div>
+
+        <!-- BPU -->
+        <div id="bpu" class="workflow">
+          <div class="workflow-head">
+            <div>
+              <h2>Votre BPU & bibliothèque de prix</h2>
+              <p>Importez votre bordereau de prix unitaires et utilisez-le automatiquement pour les chiffrages.</p>
+            </div>
+            <div class="mode-chip">Référentiel de prix</div>
+          </div>
+
+          <div class="form-grid">
+            <section class="field-card">
+              <div class="field-card-header">
+                <div class="field-number">01</div>
+                <div><h3 class="field-card-title">Importer votre BPU</h3><p class="field-card-help">Excel, CSV, PDF ou image. Excel/CSV sont lus directement dans l'application.</p></div>
+              </div>
+              <div class="upload-zone" style="min-height:155px" onclick="document.getElementById('bpu-file').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'bpu-file')">
+                <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+                <div class="upload-label">Charger le BPU</div>
+                <div class="upload-hint">XLSX · XLS · CSV · PDF · JPG · PNG</div>
+                <input type="file" id="bpu-file" accept=".xlsx,.xls,.csv,.pdf,image/*">
+              </div>
+              <div id="bpu-file-name" class="selected-file"></div>
+              <div id="bpu-import-message" class="bpu-import-message"></div>
+              <div class="bpu-help"><strong>Colonnes reconnues :</strong> référence/code, désignation/libellé, unité et prix unitaire/P.U. Pour les PDF et images, l'application essaie l'API <code>/api/parse-bpu</code> afin d'extraire les lignes.</div>
+            </section>
+          </div>
+
+          <div class="bpu-toolbar">
+            <div><h3>Lignes du BPU</h3><p id="bpu-count">Aucune ligne chargée.</p></div>
+            <div class="bpu-actions">
+              <button class="btn-secondary" id="bpu-demo-btn" type="button">Charger un exemple</button>
+              <button class="btn-secondary" id="bpu-add-btn" type="button">＋ Ajouter une ligne</button>
+              <button class="btn-secondary" id="bpu-clear-btn" type="button">Vider le BPU</button>
+            </div>
+          </div>
+          <div id="bpu-table-container"></div>
+        </div>
+
+        <!-- BIBLIOTHÈQUE D'OUVRAGES -->
+        <div id="library" class="workflow">
+          <div class="workflow-head">
+            <div>
+              <h2>Bibliothèque d’ouvrages</h2>
+              <p>Créez des ouvrages types avec leur unité, mode de métré et composition de prix. Un clic les ajoute au chiffrage.</p>
+            </div>
+            <div class="mode-chip">Ouvrages composés</div>
+          </div>
+
+          <div class="feature-strip">
+            <div class="feature-pill"><strong>Mur / cloison</strong>m² net avec ouvertures</div>
+            <div class="feature-pill"><strong>Sol / plafond</strong>m² + pertes</div>
+            <div class="feature-pill"><strong>Plinthes / réseaux</strong>ml ou m</div>
+            <div class="feature-pill"><strong>Béton / terrassement</strong>m³</div>
+            <div class="feature-pill"><strong>Prix composé</strong>matériaux + MO + marge</div>
+          </div>
+
+          <div class="bpu-toolbar">
+            <div><h3>Ouvrages disponibles</h3><p id="library-count"></p></div>
+            <div class="bpu-actions">
+              <button class="btn-secondary" type="button" id="library-demo-btn">Réinitialiser les modèles</button>
+              <button class="btn-secondary" type="button" id="library-add-btn">＋ Nouvel ouvrage</button>
+            </div>
+          </div>
+          <div id="library-grid" class="library-grid"></div>
+        </div>
+
+        <!-- DQE / DPGF -->
+        <div id="dqe" class="workflow">
+          <div class="workflow-head">
+            <div>
+              <h2>DQE / DPGF</h2>
+              <p>Transformez le métré courant en document quantitatif et financier, classé par lots et exportable.</p>
+            </div>
+            <div class="mode-chip">Édition & export</div>
+          </div>
+
+          <section class="field-card">
+            <div class="field-card-header">
+              <div class="field-number">01</div>
+              <div><h3 class="field-card-title">Informations du dossier</h3><p class="field-card-help">Ces informations apparaissent dans le document exporté.</p></div>
+            </div>
+            <div class="project-form-grid">
+              <div class="form-field"><label>Nom du projet</label><input id="dqe-project-name" data-project-field="name" placeholder="Ex. Rénovation Villa"></div>
+              <div class="form-field"><label>Client / maître d’ouvrage</label><input id="dqe-client" data-project-field="client" placeholder="Nom du client"></div>
+              <div class="form-field"><label>Référence</label><input id="dqe-reference" data-project-field="reference" placeholder="MOE-2026-001"></div>
+              <div class="form-field"><label>Adresse chantier</label><input id="dqe-address" data-project-field="address" placeholder="Adresse du chantier"></div>
+              <div class="form-field"><label>Date</label><input id="dqe-date" data-project-field="date" type="date"></div>
+              <div class="form-field"><label>Type de document</label><select id="dqe-document-type"><option value="DQE">DQE — détail quantitatif estimatif</option><option value="DPGF">DPGF — décomposition du prix global et forfaitaire</option></select></div>
+            </div>
+          </section>
+
+          <div class="dqe-toolbar">
+            <div><strong id="dqe-row-count">0 poste</strong><div style="color:var(--muted);font-size:11px;margin-top:2px">Le document reprend le métré actuellement chargé.</div></div>
+            <div class="bpu-actions">
+              <button class="btn-secondary" type="button" id="dqe-refresh-btn">↻ Actualiser</button>
+              <button class="btn-secondary" type="button" id="dqe-excel-btn">Exporter Excel</button>
+              <button class="btn-primary" style="width:auto;min-width:0" type="button" id="dqe-pdf-btn">Imprimer / PDF</button>
+            </div>
+          </div>
+          <div id="dqe-table-container"></div>
+        </div>
+
+        <!-- PROJETS & AVENANTS -->
+        <div id="projects" class="workflow">
+          <div class="workflow-head">
+            <div>
+              <h2>Projets & avenants</h2>
+              <p>Sauvegardez plusieurs dossiers de chiffrage et suivez les travaux supplémentaires ou moins-values.</p>
+            </div>
+            <div class="mode-chip">Suivi financier</div>
+          </div>
+
+          <section class="field-card">
+            <div class="field-card-header">
+              <div class="field-number">01</div>
+              <div><h3 class="field-card-title">Projet courant</h3><p class="field-card-help">Les métrés et prix du chiffrage courant seront enregistrés avec ce dossier.</p></div>
+            </div>
+            <div class="project-form-grid">
+              <div class="form-field"><label>Nom du projet</label><input id="project-name" data-project-field="name" placeholder="Nom du dossier"></div>
+              <div class="form-field"><label>Client</label><input id="project-client" data-project-field="client" placeholder="Client"></div>
+              <div class="form-field"><label>Référence</label><input id="project-reference" data-project-field="reference" placeholder="Référence interne"></div>
+              <div class="form-field"><label>Adresse</label><input id="project-address" data-project-field="address" placeholder="Adresse chantier"></div>
+              <div class="form-field"><label>Date</label><input id="project-date" data-project-field="date" type="date"></div>
+              <div class="form-field"><label>Statut</label><select id="project-status" data-project-field="status"><option>Étude</option><option>Consultation</option><option>En travaux</option><option>Réceptionné</option></select></div>
+            </div>
+            <div class="project-toolbar">
+              <div class="notice">La sauvegarde locale conserve les dossiers dans ce navigateur. Pour un usage multi-utilisateur, raccordez ensuite ces données à votre base serveur.</div>
+              <div class="bpu-actions">
+                <button class="btn-secondary" type="button" id="project-new-btn">Nouveau dossier</button>
+                <button class="btn-primary" style="width:auto;min-width:0" type="button" id="project-save-btn">Enregistrer le projet</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-head">
+              <div><h3>Avenants / travaux supplémentaires</h3><p>Ajoutez une plus-value ou une moins-value au montant de base.</p></div>
+              <button class="btn-secondary" type="button" id="amendment-add-btn">＋ Ajouter un avenant</button>
+            </div>
+            <div id="project-kpis" class="kpi-row"></div>
+            <div id="amendments-list"></div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-head"><div><h3>Mes projets</h3><p id="projects-count">Aucun projet enregistré.</p></div></div>
+            <div id="projects-list" class="project-list"></div>
+          </section>
         </div>
       </div>
     </section>
@@ -794,10 +1373,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const state = {
   verify: { doc: null, photo: null, docName: '', photoName: '' },
-  generate: { photo: null, photoName: '', notes: '' },
+  generate: { photo: null, photoName: '', notes: '', meterLines: [] },
+  bpu: { file: null, fileName: '', items: [] },
+  library: { items: [] },
+  currentProject: { id:'', name:'', client:'', reference:'', address:'', date:new Date().toISOString().slice(0,10), status:'Étude', amendments:[] },
+  projects: [],
   cameraTarget: null,
   stream: null
 };
@@ -1049,7 +1633,7 @@ async function generateEstimate() {
       response = await fetch('/api/generate-estimate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoBase64, notes: state.generate.notes })
+        body: JSON.stringify({ photoBase64, notes: state.generate.notes, bpuItems: state.bpu.items })
       });
     } catch (_) {}
 
@@ -1073,52 +1657,1087 @@ async function generateEstimate() {
 function simulateGeneration() {
   return {
     items: [
-      { name: 'Peinture', qty: 28, unit: 'm²', pricePerUnit: 15 },
-      { name: 'Carrelage', qty: 22, unit: 'm²', pricePerUnit: 52 },
-      { name: 'Cloison', qty: 15, unit: 'm²', pricePerUnit: 42 }
+      { name: 'Peinture murale', qty: 28, unit: 'm²', pricePerUnit: 15, length: 10, height: 2.8, width: 0, calcType: 'wall_m2' },
+      { name: 'Carrelage au sol', qty: 22, unit: 'm²', pricePerUnit: 52, length: 5.5, width: 4, height: 0, calcType: 'floor_m2' },
+      { name: 'Plinthes', qty: 18, unit: 'ml', pricePerUnit: 12, length: 18, width: 0, height: 0, calcType: 'linear' }
     ]
   };
+}
+
+function safeNumber(value) {
+  let text = String(value ?? '').trim().replace(/\s/g, '').replace(/[^0-9,.-]/g, '');
+  if (!text) return 0;
+  const comma = text.lastIndexOf(',');
+  const dot = text.lastIndexOf('.');
+  if (comma >= 0 && dot >= 0) {
+    if (comma > dot) text = text.replace(/\./g, '').replace(',', '.');
+    else text = text.replace(/,/g, '');
+  } else if (comma >= 0) {
+    text = text.replace(',', '.');
+  }
+  const n = Number(text);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+function formatNumber(value, max = 2) {
+  return safeNumber(value).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: max });
+}
+
+function formatMoney(value) {
+  return safeNumber(value).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+function normalizeEstimateItem(item = {}, index = 0) {
+  const unit = normalizeUnit(item.unit || 'm²');
+  let calcType = item.calcType;
+  if (!calcType) {
+    if (unit === 'ml') calcType = 'linear';
+    else if (unit === 'm') calcType = 'meter';
+    else if (unit === 'm³') calcType = 'volume_m3';
+    else if (unit === 'u' || unit === 'unité') calcType = 'unit';
+    else calcType = 'direct_m2';
+  }
+  return {
+    id: item.id || `line-${Date.now()}-${index}-${Math.random().toString(36).slice(2,7)}`,
+    name: item.name || 'Nouveau poste',
+    lot: item.lot || 'Lot non classé',
+    status: item.status || 'À vérifier',
+    calcType,
+    length: safeNumber(item.length),
+    width: safeNumber(item.width),
+    height: safeNumber(item.height),
+    directQty: safeNumber(item.directQty ?? item.qty),
+    openingsArea: safeNumber(item.openingsArea),
+    wastePercent: safeNumber(item.wastePercent),
+    count: Math.max(1, safeNumber(item.count) || 1),
+    pricePerUnit: safeNumber(item.pricePerUnit),
+    useCostBreakdown: Boolean(item.useCostBreakdown),
+    materialCost: safeNumber(item.materialCost),
+    laborCost: safeNumber(item.laborCost),
+    equipmentCost: safeNumber(item.equipmentCost),
+    subcontractCost: safeNumber(item.subcontractCost),
+    overheadPercent: safeNumber(item.overheadPercent),
+    marginPercent: safeNumber(item.marginPercent),
+    bpuId: item.bpuId || '',
+    bpuCode: item.bpuCode || '',
+    priceSource: item.priceSource || 'manual',
+    libraryId: item.libraryId || ''
+  };
+}
+
+function calcMeta(type) {
+  const map = {
+    wall_m2: { unit: 'm²', label: 'Surface murale', formula: 'Longueur × hauteur' },
+    wall_net_m2: { unit: 'm²', label: 'Surface murale nette', formula: '(Longueur × hauteur − ouvertures) × nombre + pertes' },
+    floor_m2: { unit: 'm²', label: 'Surface sol/plafond', formula: 'Longueur × largeur × nombre + pertes' },
+    direct_m2: { unit: 'm²', label: 'Surface saisie', formula: 'Quantité m² saisie + pertes' },
+    linear: { unit: 'ml', label: 'Mètre linéaire', formula: 'Longueur × nombre + pertes' },
+    meter: { unit: 'm', label: 'Mètre', formula: 'Longueur × nombre + pertes' },
+    volume_m3: { unit: 'm³', label: 'Volume', formula: 'Longueur × largeur × hauteur × nombre + pertes' },
+    unit: { unit: 'u', label: 'Unité', formula: 'Quantité saisie × nombre' }
+  };
+  return map[type] || map.direct_m2;
+}
+
+function calculateQty(line) {
+  const L = safeNumber(line.length);
+  const W = safeNumber(line.width);
+  const H = safeNumber(line.height);
+  const D = safeNumber(line.directQty);
+  const openings = safeNumber(line.openingsArea);
+  const count = Math.max(1, safeNumber(line.count) || 1);
+  const waste = Math.max(0, safeNumber(line.wastePercent)) / 100;
+  let base = 0;
+  switch (line.calcType) {
+    case 'wall_m2': base = L * H * count; break;
+    case 'wall_net_m2': base = Math.max(0, (L * H) - openings) * count; break;
+    case 'floor_m2': base = L * W * count; break;
+    case 'linear': base = L * count; break;
+    case 'meter': base = L * count; break;
+    case 'volume_m3': base = L * W * H * count; break;
+    case 'unit': return D * count;
+    case 'direct_m2':
+    default: base = D * count; break;
+  }
+  return base * (1 + waste);
+}
+
+function detailedUnitPrice(line) {
+  const base = safeNumber(line.materialCost) + safeNumber(line.laborCost) + safeNumber(line.equipmentCost) + safeNumber(line.subcontractCost);
+  const withOverhead = base * (1 + safeNumber(line.overheadPercent) / 100);
+  return withOverhead * (1 + safeNumber(line.marginPercent) / 100);
+}
+
+function getLineUnitPrice(line) {
+  return line.useCostBreakdown ? detailedUnitPrice(line) : safeNumber(line.pricePerUnit);
+}
+
+function getLineAmount(line) {
+  return calculateQty(line) * getLineUnitPrice(line);
+}
+
+function getMeterLines() {
+  if (!Array.isArray(state.generate.meterLines)) state.generate.meterLines = [];
+  return state.generate.meterLines;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function normalizeSearchText(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/m²/g, 'm2')
+    .replace(/m³/g, 'm3')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function normalizeUnit(value) {
+  const u = normalizeSearchText(value).replace(/\s+/g, '');
+  if (['m2','m²','m^2','mtr2'].includes(u)) return 'm²';
+  if (['m3','m³','m^3','mtr3','metrecube','metrescubes'].includes(u)) return 'm³';
+  if (['ml','metrelineaire','metreslineaires','mlineaire'].includes(u)) return 'ml';
+  if (['m','metre','metres'].includes(u)) return 'm';
+  if (['u','unite','unites','unit'].includes(u)) return 'u';
+  return String(value || 'u').trim();
+}
+
+function calcTypeFromUnit(unit) {
+  const u = normalizeUnit(unit);
+  if (u === 'ml') return 'linear';
+  if (u === 'm') return 'meter';
+  if (u === 'm³') return 'volume_m3';
+  if (u === 'u') return 'unit';
+  return 'direct_m2';
+}
+
+function bpuItemById(id) {
+  return state.bpu.items.find(x => x.id === id) || null;
+}
+
+function scoreBpuMatch(name, item) {
+  const a = normalizeSearchText(name);
+  const b = normalizeSearchText(`${item.code || ''} ${item.description || ''}`);
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (b.includes(a) || a.includes(normalizeSearchText(item.description))) return .82;
+  const aa = new Set(a.split(' ').filter(x => x.length > 2));
+  const bb = new Set(b.split(' ').filter(x => x.length > 2));
+  if (!aa.size || !bb.size) return 0;
+  let common = 0;
+  aa.forEach(t => { if (bb.has(t)) common++; });
+  return common / Math.max(aa.size, bb.size);
+}
+
+function findBestBpuMatch(name) {
+  let best = null, bestScore = 0;
+  state.bpu.items.forEach(item => {
+    const score = scoreBpuMatch(name, item);
+    if (score > bestScore) { bestScore = score; best = item; }
+  });
+  return bestScore >= .45 ? best : null;
+}
+
+function applyBpuToLine(line, item, keepName = true) {
+  if (!item) {
+    line.bpuId = '';
+    line.bpuCode = '';
+    line.priceSource = 'manual';
+    return line;
+  }
+  line.bpuId = item.id;
+  line.bpuCode = item.code || '';
+  line.priceSource = 'bpu';
+  line.pricePerUnit = safeNumber(item.price);
+  line.useCostBreakdown = false;
+  if (!keepName && item.description) line.name = item.description;
+  const newType = calcTypeFromUnit(item.unit);
+  if (newType !== 'direct_m2' || !line.calcType) line.calcType = newType;
+  return line;
+}
+
+function autoApplyBpu(line) {
+  if (!state.bpu.items.length || line.bpuId) return line;
+  const match = findBestBpuMatch(line.name);
+  return match ? applyBpuToLine(line, match, true) : line;
+}
+
+function bpuSelectOptions(line) {
+  let html = '<option value="">Prix manuel / aucun BPU</option>';
+  state.bpu.items.forEach(item => {
+    const selected = item.id === line.bpuId ? 'selected' : '';
+    const label = `${item.code ? item.code + ' — ' : ''}${item.description} · ${formatMoney(item.price)}/${normalizeUnit(item.unit)}`;
+    html += `<option value="${escapeHtml(item.id)}" ${selected}>${escapeHtml(label)}</option>`;
+  });
+  return html;
+}
+
+function meterCardHtml(line, index) {
+  const meta = calcMeta(line.calcType);
+  const qty = calculateQty(line);
+  const unitPrice = getLineUnitPrice(line);
+  const amount = qty * unitPrice;
+  const directDisabled = ['wall_m2','wall_net_m2','floor_m2','linear','meter','volume_m3'].includes(line.calcType) ? 'disabled' : '';
+  const openingDisabled = line.calcType !== 'wall_net_m2' ? 'disabled' : '';
+  return `<div class="meter-card" data-line-id="${line.id}">
+    <div class="meter-card-head">
+      <input class="meter-name-input" aria-label="Nom du poste" value="${escapeHtml(line.name)}" data-field="name">
+      <button class="remove-line" type="button" title="Supprimer ce poste" aria-label="Supprimer ce poste" data-action="remove">×</button>
+    </div>
+    <div class="meter-card-body">
+      <div class="meter-grid">
+        <div class="meter-field span-2">
+          <label>Mode de calcul</label>
+          <select class="meter-select" data-field="calcType">
+            <option value="wall_m2" ${line.calcType==='wall_m2'?'selected':''}>m² mur — longueur × hauteur</option>
+            <option value="wall_net_m2" ${line.calcType==='wall_net_m2'?'selected':''}>m² mur net — déduction portes/fenêtres</option>
+            <option value="floor_m2" ${line.calcType==='floor_m2'?'selected':''}>m² sol/plafond — longueur × largeur</option>
+            <option value="direct_m2" ${line.calcType==='direct_m2'?'selected':''}>m² — saisie directe</option>
+            <option value="linear" ${line.calcType==='linear'?'selected':''}>ml — mètre linéaire</option>
+            <option value="meter" ${line.calcType==='meter'?'selected':''}>m — mètre</option>
+            <option value="volume_m3" ${line.calcType==='volume_m3'?'selected':''}>m³ — longueur × largeur × hauteur</option>
+            <option value="unit" ${line.calcType==='unit'?'selected':''}>u — unité</option>
+          </select>
+        </div>
+        <div class="meter-field span-2">
+          <label>Référence / prix BPU</label>
+          <select class="bpu-ref-select" data-field="bpuId">${bpuSelectOptions(line)}</select>
+        </div>
+        <div class="meter-field"><label>Lot</label><input class="meter-input" value="${escapeHtml(line.lot)}" data-field="lot" placeholder="Ex. Peinture"></div>
+        <div class="meter-field"><label>Nombre / répétitions</label><input class="meter-input" type="number" min="1" step="1" value="${line.count || 1}" data-field="count"></div>
+        <div class="meter-field">
+          <label>Longueur (m)</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.length || ''}" data-field="length" placeholder="0,00">
+        </div>
+        <div class="meter-field">
+          <label>Largeur (m)</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.width || ''}" data-field="width" placeholder="0,00">
+        </div>
+        <div class="meter-field">
+          <label>Hauteur (m)</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.height || ''}" data-field="height" placeholder="0,00">
+        </div>
+        <div class="meter-field">
+          <label>Ouvertures à déduire (m²)</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.openingsArea || ''}" data-field="openingsArea" placeholder="0,00" ${openingDisabled}>
+        </div>
+        <div class="meter-field">
+          <label>Pertes / chutes (%)</label>
+          <input class="meter-input" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="${line.wastePercent || ''}" data-field="wastePercent" placeholder="0">
+        </div>
+        <div class="meter-field">
+          <label>Quantité directe</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.directQty || ''}" data-field="directQty" placeholder="0,00" ${directDisabled}>
+        </div>
+        <div class="meter-field">
+          <label>Quantité calculée</label>
+          <div class="meter-output"><span data-output="qty">${formatNumber(qty)}</span><span class="meter-unit-note" data-output="unit">${meta.unit}</span></div>
+        </div>
+        <div class="meter-field">
+          <label>Prix unitaire manuel / BPU (€ / ${meta.unit})</label>
+          <input class="meter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${line.pricePerUnit || ''}" data-field="pricePerUnit" placeholder="0,00" ${line.useCostBreakdown ? 'disabled' : ''}>
+        </div>
+        <div class="meter-field">
+          <label>Prix unitaire retenu</label>
+          <div class="meter-output"><span data-output="unit-price">${formatMoney(unitPrice)}</span></div>
+        </div>
+        <div class="meter-field">
+          <label>Montant HT</label>
+          <div class="meter-output amount"><span data-output="amount">${formatMoney(amount)}</span></div>
+        </div>
+      </div>
+
+      <div class="meter-status-row">
+        <select class="tiny-select" data-field="status" aria-label="Statut du poste">
+          ${['Estimé par IA','À vérifier','Vérifié sur site','Validé'].map(s => `<option ${line.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="cost-breakdown">
+        <div class="cost-breakdown-head">
+          <strong>Décomposition du prix unitaire</strong>
+          <label class="cost-toggle"><input type="checkbox" data-field="useCostBreakdown" ${line.useCostBreakdown?'checked':''}> Calculer le P.U. à partir des coûts</label>
+        </div>
+        <div class="cost-grid">
+          <div class="meter-field"><label>Matériaux / unité</label><input class="meter-input" type="number" min="0" step="0.01" data-field="materialCost" value="${line.materialCost || ''}" placeholder="0,00"></div>
+          <div class="meter-field"><label>Main-d’œuvre / unité</label><input class="meter-input" type="number" min="0" step="0.01" data-field="laborCost" value="${line.laborCost || ''}" placeholder="0,00"></div>
+          <div class="meter-field"><label>Matériel / unité</label><input class="meter-input" type="number" min="0" step="0.01" data-field="equipmentCost" value="${line.equipmentCost || ''}" placeholder="0,00"></div>
+          <div class="meter-field"><label>Sous-traitance / unité</label><input class="meter-input" type="number" min="0" step="0.01" data-field="subcontractCost" value="${line.subcontractCost || ''}" placeholder="0,00"></div>
+          <div class="meter-field"><label>Frais généraux (%)</label><input class="meter-input" type="number" min="0" step="0.1" data-field="overheadPercent" value="${line.overheadPercent || ''}" placeholder="0"></div>
+          <div class="meter-field"><label>Marge (%)</label><input class="meter-input" type="number" min="0" step="0.1" data-field="marginPercent" value="${line.marginPercent || ''}" placeholder="0"></div>
+        </div>
+        <div class="cost-result"><span>Coût composé calculé par unité</span><strong data-output="detail-unit-price">${formatMoney(detailedUnitPrice(line))}</strong></div>
+      </div>
+
+      <div class="meter-formula"><span class="formula-chip" data-output="formula">${meta.formula}</span><span>Longueur : ${formatNumber(line.length)} m · Largeur : ${formatNumber(line.width)} m · Hauteur : ${formatNumber(line.height)} m · Ouvertures : ${formatNumber(line.openingsArea)} m² · Pertes : ${formatNumber(line.wastePercent)} %</span></div>
+      <div class="bpu-source-line" data-output="price-source">${line.priceSource === 'bpu' ? `<span class="bpu-source-chip">BPU ${escapeHtml(line.bpuCode || '')}</span><span>Prix issu du bordereau importé. Activez la décomposition pour recalculer un prix de vente.</span>` : '<span class="bpu-source-chip manual">Prix manuel / composé</span><span>Vous pouvez saisir un P.U. ou le calculer à partir des coûts.</span>'}</div>
+    </div>
+  </div>`;
+}
+
+function renderMeterLines() {
+  const list = document.getElementById('meter-list');
+  if (!list) return;
+  const lines = getMeterLines();
+  list.innerHTML = lines.length ? lines.map(meterCardHtml).join('') : '<div class="meter-empty">Aucun poste. Cliquez sur « Ajouter un poste » pour commencer le métré.</div>';
+  recalculateEstimateTotals();
+}
+
+function updateMeterCard(card, line) {
+  const meta = calcMeta(line.calcType);
+  const qty = calculateQty(line);
+  const unitPrice = getLineUnitPrice(line);
+  const amount = qty * unitPrice;
+  const q = card.querySelector('[data-output="qty"]');
+  const u = card.querySelector('[data-output="unit"]');
+  const a = card.querySelector('[data-output="amount"]');
+  const up = card.querySelector('[data-output="unit-price"]');
+  const dp = card.querySelector('[data-output="detail-unit-price"]');
+  const f = card.querySelector('[data-output="formula"]');
+  if (q) q.textContent = formatNumber(qty);
+  if (u) u.textContent = meta.unit;
+  if (a) a.textContent = formatMoney(amount);
+  if (up) up.textContent = formatMoney(unitPrice);
+  if (dp) dp.textContent = formatMoney(detailedUnitPrice(line));
+  if (f) f.textContent = meta.formula;
+  const priceInput = card.querySelector('[data-field="pricePerUnit"]');
+  const priceLabel = priceInput?.closest('.meter-field')?.querySelector('label');
+  if (priceLabel) priceLabel.textContent = `Prix unitaire manuel / BPU (€ / ${meta.unit})`;
+  if (priceInput) priceInput.disabled = !!line.useCostBreakdown;
+  const direct = card.querySelector('[data-field="directQty"]');
+  if (direct) direct.disabled = ['wall_m2','wall_net_m2','floor_m2','linear','meter','volume_m3'].includes(line.calcType);
+  const openings = card.querySelector('[data-field="openingsArea"]');
+  if (openings) openings.disabled = line.calcType !== 'wall_net_m2';
+  const formulaLine = card.querySelector('.meter-formula');
+  if (formulaLine) formulaLine.innerHTML = `<span class="formula-chip" data-output="formula">${meta.formula}</span><span>Longueur : ${formatNumber(line.length)} m · Largeur : ${formatNumber(line.width)} m · Hauteur : ${formatNumber(line.height)} m · Ouvertures : ${formatNumber(line.openingsArea)} m² · Pertes : ${formatNumber(line.wastePercent)} %</span>`;
+  const sourceLine = card.querySelector('[data-output="price-source"]');
+  if (sourceLine) sourceLine.innerHTML = line.priceSource === 'bpu' ? `<span class="bpu-source-chip">BPU ${escapeHtml(line.bpuCode || '')}</span><span>Prix issu du bordereau importé. Activez la décomposition pour recalculer un prix de vente.</span>` : '<span class="bpu-source-chip manual">Prix manuel / composé</span><span>Vous pouvez saisir un P.U. ou le calculer à partir des coûts.</span>';
+  recalculateEstimateTotals();
+}
+
+function recalculateEstimateTotals() {
+  const lines = getMeterLines();
+  const totalHT = lines.reduce((sum, line) => sum + getLineAmount(line), 0);
+  const taxRate = safeNumber(document.getElementById('tax-rate')?.value ?? 20);
+  const tax = totalHT * taxRate / 100;
+  const ttc = totalHT + tax;
+  const htEl = document.getElementById('summary-ht');
+  const taxEl = document.getElementById('summary-tax');
+  const ttcEl = document.getElementById('summary-ttc');
+  const taxLabel = document.getElementById('summary-tax-label');
+  if (htEl) htEl.textContent = formatMoney(totalHT);
+  if (taxEl) taxEl.textContent = formatMoney(tax);
+  if (ttcEl) ttcEl.textContent = formatMoney(ttc);
+  if (taxLabel) taxLabel.textContent = `TVA / taxe ${formatNumber(taxRate)} %`;
+}
+
+function addMeterLine() {
+  getMeterLines().push(normalizeEstimateItem({ name:'Nouveau poste', unit:'m²', qty:0, pricePerUnit:0, calcType:'wall_m2' }, getMeterLines().length));
+  renderMeterLines();
+  const cards = document.querySelectorAll('#meter-list .meter-card');
+  cards[cards.length - 1]?.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
 function displayGenerateResults(result) {
   const resultsDiv = document.getElementById('generate-results');
   resultsDiv.classList.add('show');
+  state.generate.meterLines = (result.items || []).map(normalizeEstimateItem).map(autoApplyBpu);
 
-  let html = '<div class="results-card"><div class="results-head"><div><h3 class="results-title">Estimation générée</h3><p class="results-subtitle">Quantités et montants indicatifs issus de l’analyse</p></div></div><div class="results-body"><div class="validation-note">Cette estimation doit être contrôlée et validée sur site avant engagement.</div>';
-  let totalHT = 0;
-  const items = result.items || [];
-
-  if (items.length > 0) {
-    html += '<div class="comparison">';
-    items.forEach(item => {
-      const qty = Number(item.qty) || 0;
-      const price = Number(item.pricePerUnit) || 0;
-      const total = qty * price;
-      totalHT += total;
-      html += `<div class="comparison-item">
-        <div class="comparison-header"><div class="item-name">${item.name || 'Poste'}</div><span class="status-badge status-ok">${total.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span></div>
-        <div class="comparison-row">
-          <div class="metric"><div class="comparison-label">Quantité</div><div class="comparison-value">${qty.toFixed(1)}</div><div class="comparison-unit">${item.unit || ''}</div></div>
-          <div class="metric"><div class="comparison-label">Prix unitaire</div><div class="comparison-value">${price.toLocaleString('fr-FR')} €</div><div class="comparison-unit">par ${item.unit || 'unité'}</div></div>
+  resultsDiv.innerHTML = `<div class="results-card">
+    <div class="results-head">
+      <div><h3 class="results-title">Métré & chiffrage</h3><p class="results-subtitle">Métrés avancés, ouvertures, pertes, coûts détaillés, BPU et montants modifiables</p></div>
+    </div>
+    <div class="results-body">
+      <div class="validation-note">Les mesures proposées par l’IA sont indicatives. Corrigez longueur, largeur, hauteur et prix avant validation. ${state.bpu.items.length ? `Le BPU « ${escapeHtml(state.bpu.fileName || 'chargé')} » est actif : les prix compatibles ont été rapprochés automatiquement.` : 'Aucun BPU actif : les prix restent manuels.'}</div>
+      <div class="meter-toolbar">
+        <div><h4>Postes de travaux</h4><p>m² nets, m², ml, m, m³ et unités avec calcul automatique, pertes et ouvertures.</p></div>
+        <button class="btn-secondary" id="add-meter-line" type="button">＋ Ajouter un poste</button>
+      </div>
+      <div id="meter-list" class="meter-list"></div>
+      <div class="pricing-summary">
+        <div class="summary-box" style="margin-top:0">
+          <div class="summary-row"><span class="summary-label">Montant HT</span><span class="summary-value" id="summary-ht">0,00 €</span></div>
+          <div class="summary-row"><span class="summary-label" id="summary-tax-label">TVA / taxe 20 %</span><span class="summary-value" id="summary-tax">0,00 €</span></div>
+          <div class="summary-row total"><span class="summary-label">Total TTC</span><span class="total-ttc" id="summary-ttc">0,00 €</span></div>
         </div>
-      </div>`;
-    });
-    html += '</div>';
-  }
+        <div class="tax-panel">
+          <label for="tax-rate">TVA / taxe (%)</label>
+          <div class="tax-row"><input id="tax-rate" type="number" min="0" max="100" step="0.1" value="20" inputmode="decimal"><span>%</span></div>
+          <p style="margin:9px 0 0;color:var(--muted);font-size:11px">Taux modifiable selon le dossier.</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
 
-  const tva = totalHT * 0.2;
-  const ttc = totalHT + tva;
-  html += `<div class="summary-box">
-    <div class="summary-row"><span class="summary-label">Montant HT</span><span class="summary-value">${totalHT.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span></div>
-    <div class="summary-row"><span class="summary-label">TVA 20 %</span><span class="summary-value">${tva.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span></div>
-    <div class="summary-row total"><span class="summary-label">Total TTC</span><span class="total-ttc">${ttc.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span></div>
-  </div></div></div>`;
+  renderMeterLines();
 
-  resultsDiv.innerHTML = html;
+  document.getElementById('add-meter-line').addEventListener('click', addMeterLine);
+  document.getElementById('tax-rate').addEventListener('input', recalculateEstimateTotals);
+
+  const meterList = document.getElementById('meter-list');
+  meterList.addEventListener('input', event => {
+    const field = event.target.dataset.field;
+    if (!field) return;
+    const card = event.target.closest('.meter-card');
+    const line = getMeterLines().find(x => x.id === card?.dataset.lineId);
+    if (!line) return;
+    if (event.target.type === 'checkbox') line[field] = event.target.checked;
+    else if (['name','lot','status','calcType','bpuId'].includes(field)) line[field] = event.target.value;
+    else line[field] = safeNumber(event.target.value);
+    if (field === 'pricePerUnit') { line.priceSource = 'manual'; line.useCostBreakdown = false; }
+    updateMeterCard(card, line);
+  });
+  meterList.addEventListener('change', event => {
+    const field = event.target.dataset.field;
+    if (!['calcType','bpuId','useCostBreakdown','status'].includes(field)) return;
+    const card = event.target.closest('.meter-card');
+    const line = getMeterLines().find(x => x.id === card?.dataset.lineId);
+    if (!line) return;
+    if (field === 'calcType') {
+      line.calcType = event.target.value;
+    } else if (field === 'bpuId') {
+      const item = bpuItemById(event.target.value);
+      applyBpuToLine(line, item, true);
+    } else if (field === 'useCostBreakdown') {
+      line.useCostBreakdown = event.target.checked;
+    } else if (field === 'status') {
+      line.status = event.target.value;
+    }
+    renderMeterLines();
+  });
+  meterList.addEventListener('click', event => {
+    const button = event.target.closest('[data-action="remove"]');
+    if (!button) return;
+    const card = button.closest('.meter-card');
+    state.generate.meterLines = getMeterLines().filter(x => x.id !== card?.dataset.lineId);
+    renderMeterLines();
+  });
+
   resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-window.addEventListener('beforeunload', closeCamera);
+
+// BPU
+function makeBpuItem(raw = {}, index = 0) {
+  return {
+    id: raw.id || `bpu-${Date.now()}-${index}-${Math.random().toString(36).slice(2,7)}`,
+    code: String(raw.code ?? raw.reference ?? raw.ref ?? '').trim(),
+    description: String(raw.description ?? raw.designation ?? raw.libelle ?? raw.label ?? raw.poste ?? '').trim() || 'Poste sans désignation',
+    unit: normalizeUnit(raw.unit ?? raw.unite ?? raw['unité'] ?? 'u'),
+    price: safeNumber(raw.price ?? raw.prix ?? raw.pricePerUnit ?? raw.pu ?? raw['prix unitaire'])
+  };
+}
+
+function renderBpu() {
+  const container = document.getElementById('bpu-table-container');
+  const count = document.getElementById('bpu-count');
+  if (!container || !count) return;
+  const items = state.bpu.items;
+  count.textContent = items.length ? `${items.length} ligne${items.length > 1 ? 's' : ''} disponible${items.length > 1 ? 's' : ''} pour le chiffrage.` : 'Aucune ligne chargée.';
+  if (!items.length) {
+    container.innerHTML = '<div class="bpu-empty">Importez un BPU ou ajoutez vos prix manuellement. Les prix seront ensuite proposés dans le métré.</div>';
+  } else {
+    container.innerHTML = `<div class="bpu-table-wrap"><table class="bpu-table">
+      <thead><tr><th class="bpu-col-code">Référence</th><th>Désignation / libellé</th><th class="bpu-col-unit">Unité</th><th class="bpu-col-price">Prix unitaire HT</th><th class="bpu-col-action"></th></tr></thead>
+      <tbody>${items.map(item => `<tr data-bpu-id="${escapeHtml(item.id)}">
+        <td><input class="bpu-input" data-bpu-field="code" value="${escapeHtml(item.code)}" placeholder="Réf."></td>
+        <td><input class="bpu-input" data-bpu-field="description" value="${escapeHtml(item.description)}" placeholder="Désignation du poste"></td>
+        <td><select class="bpu-select" data-bpu-field="unit">
+          ${['m²','ml','m','m³','u'].map(u => `<option value="${u}" ${normalizeUnit(item.unit)===u?'selected':''}>${u}</option>`).join('')}
+        </select></td>
+        <td><input class="bpu-input bpu-price" data-bpu-field="price" type="number" min="0" step="0.01" inputmode="decimal" value="${item.price || ''}" placeholder="0,00"></td>
+        <td class="bpu-col-action"><button class="bpu-delete" type="button" data-bpu-action="delete" aria-label="Supprimer">×</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+  updateBpuIndicators();
+}
+
+function updateBpuIndicators() {
+  const status = document.getElementById('generate-bpu-status');
+  const copy = document.getElementById('generate-bpu-copy');
+  if (!status || !copy) return;
+  if (state.bpu.items.length) {
+    status.classList.add('ready');
+    status.textContent = `${state.bpu.items.length} prix BPU actifs`;
+    copy.textContent = `${state.bpu.fileName || 'BPU'} est utilisé comme base de prix. Les prix restent modifiables ligne par ligne.`;
+  } else {
+    status.classList.remove('ready');
+    status.textContent = 'Configurer le BPU';
+    copy.textContent = 'Aucun BPU chargé : les prix restent saisissables manuellement.';
+  }
+}
+
+function showBpuMessage(text, kind = 'ok') {
+  const el = document.getElementById('bpu-import-message');
+  if (!el) return;
+  el.textContent = text;
+  el.className = `bpu-import-message show ${kind}`;
+}
+
+function csvRows(text) {
+  const lines = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(x => x.trim());
+  if (!lines.length) return [];
+  const candidates = [';', ',', '\t'];
+  const delimiter = candidates.map(d => [d, (lines[0].match(new RegExp(d === '\t' ? '\\t' : `\\${d}`, 'g')) || []).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  return lines.map(line => {
+    const out = []; let cur = '', quoted = false;
+    for (let i=0;i<line.length;i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (quoted && line[i+1] === '"') { cur += '"'; i++; }
+        else quoted = !quoted;
+      } else if (ch === delimiter && !quoted) { out.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+  });
+}
+
+function bpuFromMatrix(rows) {
+  rows = (rows || []).filter(r => Array.isArray(r) && r.some(v => String(v ?? '').trim()));
+  if (!rows.length) return [];
+  const aliases = {
+    code: ['code','reference','ref','numero','n','article'],
+    description: ['designation','libelle','description','poste','ouvrage','intitule'],
+    unit: ['unite','unit','u'],
+    price: ['prix unitaire','prixunit','pu','p u','prix','price','tarif']
+  };
+  let headerIndex = 0, bestScore = -1, mapping = {};
+  for (let i=0;i<Math.min(rows.length,10);i++) {
+    const candidate = {}; let score = 0;
+    rows[i].forEach((cell, col) => {
+      const text = normalizeSearchText(cell);
+      Object.entries(aliases).forEach(([field, vals]) => {
+        if (!candidate[field] && vals.some(a => text === normalizeSearchText(a) || text.includes(normalizeSearchText(a)))) { candidate[field] = col; score++; }
+      });
+    });
+    if (score > bestScore) { bestScore = score; mapping = candidate; headerIndex = i; }
+  }
+  if (mapping.description == null && rows[0].length >= 4) mapping = { code:0, description:1, unit:2, price:3 };
+  if (mapping.description == null) return [];
+  return rows.slice(headerIndex + 1).map((row, idx) => makeBpuItem({
+    code: mapping.code != null ? row[mapping.code] : '',
+    description: row[mapping.description],
+    unit: mapping.unit != null ? row[mapping.unit] : 'u',
+    price: mapping.price != null ? row[mapping.price] : 0
+  }, idx)).filter(x => x.description && x.description !== 'Poste sans désignation');
+}
+
+async function parseBpuLocal(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'csv') {
+    const text = await file.text();
+    return bpuFromMatrix(csvRows(text));
+  }
+  if ((ext === 'xlsx' || ext === 'xls') && window.XLSX) {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type:'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const matrix = XLSX.utils.sheet_to_json(sheet, { header:1, raw:false, defval:'' });
+    return bpuFromMatrix(matrix);
+  }
+  return null;
+}
+
+async function parseBpuViaApi(file) {
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const response = await fetch('/api/parse-bpu', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({ bpuBase64:String(dataUrl).split(',')[1], fileName:file.name, mimeType:file.type })
+  });
+  if (!response.ok) throw new Error('API BPU indisponible');
+  const result = await response.json();
+  const raw = result.items || result.bpuItems || result.lines || [];
+  return raw.map(makeBpuItem);
+}
+
+async function handleBpuFile(file) {
+  state.bpu.file = file;
+  state.bpu.fileName = file.name;
+  showSelectedFile('bpu-file-name', file.name);
+  showBpuMessage('Lecture du BPU en cours…', 'ok');
+  try {
+    let items = await parseBpuLocal(file);
+    if (items === null) items = await parseBpuViaApi(file);
+    if (!items || !items.length) throw new Error('Aucune ligne exploitable détectée');
+    state.bpu.items = items;
+    renderBpu();
+    showBpuMessage(`${items.length} ligne${items.length > 1 ? 's' : ''} importée${items.length > 1 ? 's' : ''}. Le BPU est maintenant actif pour les chiffrages.`, 'ok');
+  } catch (error) {
+    console.warn('BPU import:', error);
+    state.bpu.items = [];
+    renderBpu();
+    showBpuMessage('Le fichier est chargé mais n’a pas pu être lu automatiquement. Pour un PDF/image, raccordez /api/parse-bpu ; vous pouvez aussi ajouter les lignes manuellement.', 'warn');
+  }
+}
+
+function loadDemoBpu() {
+  state.bpu.fileName = 'BPU exemple';
+  state.bpu.items = [
+    makeBpuItem({ code:'PEI-001', description:'Peinture murale - préparation et 2 couches', unit:'m²', price:15 }),
+    makeBpuItem({ code:'CAR-010', description:'Carrelage au sol - fourniture et pose', unit:'m²', price:52 }),
+    makeBpuItem({ code:'PLN-005', description:'Plinthes - fourniture et pose', unit:'ml', price:12 }),
+    makeBpuItem({ code:'CLO-020', description:'Cloison plaques de plâtre', unit:'m²', price:42 }),
+    makeBpuItem({ code:'DEP-001', description:'Dépose évacuation gravats', unit:'m²', price:18 }),
+    makeBpuItem({ code:'BET-100', description:'Béton armé - fourniture et mise en œuvre', unit:'m³', price:265 })
+  ];
+  renderBpu();
+  showBpuMessage('BPU exemple chargé. Lancez une estimation pour voir l’association automatique des prix.', 'ok');
+}
+
+function initBpuUI() {
+  const fileInput = document.getElementById('bpu-file');
+  fileInput?.addEventListener('change', e => { const file = e.target.files?.[0]; if (file) handleBpuFile(file); });
+  document.getElementById('bpu-add-btn')?.addEventListener('click', () => {
+    state.bpu.items.push(makeBpuItem({ code:'', description:'Nouveau poste', unit:'m²', price:0 }, state.bpu.items.length));
+    renderBpu();
+  });
+  document.getElementById('bpu-demo-btn')?.addEventListener('click', loadDemoBpu);
+  document.getElementById('bpu-clear-btn')?.addEventListener('click', () => {
+    state.bpu.items = []; state.bpu.file = null; state.bpu.fileName = '';
+    const name = document.getElementById('bpu-file-name'); if (name) { name.textContent=''; name.classList.remove('show'); }
+    renderBpu(); showBpuMessage('BPU vidé. Les prochains chiffrages utiliseront des prix manuels.', 'warn');
+  });
+  const container = document.getElementById('bpu-table-container');
+  container?.addEventListener('input', event => {
+    const field = event.target.dataset.bpuField; if (!field) return;
+    const row = event.target.closest('[data-bpu-id]');
+    const item = state.bpu.items.find(x => x.id === row?.dataset.bpuId); if (!item) return;
+    item[field] = field === 'price' ? safeNumber(event.target.value) : event.target.value;
+    if (field === 'unit') item.unit = normalizeUnit(item.unit);
+    updateBpuIndicators();
+  });
+  container?.addEventListener('change', event => {
+    const field = event.target.dataset.bpuField; if (field !== 'unit') return;
+    const row = event.target.closest('[data-bpu-id]');
+    const item = state.bpu.items.find(x => x.id === row?.dataset.bpuId); if (!item) return;
+    item.unit = normalizeUnit(event.target.value);
+  });
+  container?.addEventListener('click', event => {
+    const btn = event.target.closest('[data-bpu-action="delete"]'); if (!btn) return;
+    const row = btn.closest('[data-bpu-id]');
+    state.bpu.items = state.bpu.items.filter(x => x.id !== row?.dataset.bpuId);
+    renderBpu();
+  });
+  renderBpu();
+}
+
+// =============================
+// V7 — BIBLIOTHÈQUE D'OUVRAGES
+// =============================
+function defaultLibraryItems() {
+  return [
+    { id:'lib-cloison', code:'OUV-CLO-01', name:'Cloison plaques de plâtre', lot:'Cloisons / doublages', unit:'m²', calcType:'wall_net_m2', materialCost:18, laborCost:16, equipmentCost:2, subcontractCost:0, overheadPercent:8, marginPercent:12 },
+    { id:'lib-peinture', code:'OUV-PEI-01', name:'Peinture murale — préparation + 2 couches', lot:'Peinture', unit:'m²', calcType:'wall_net_m2', materialCost:5.5, laborCost:8.5, equipmentCost:0.8, subcontractCost:0, overheadPercent:8, marginPercent:12 },
+    { id:'lib-carrelage', code:'OUV-CAR-01', name:'Carrelage au sol — fourniture et pose', lot:'Revêtements de sols', unit:'m²', calcType:'floor_m2', materialCost:30, laborCost:18, equipmentCost:2, subcontractCost:0, overheadPercent:8, marginPercent:12 },
+    { id:'lib-plinthes', code:'OUV-PLN-01', name:'Plinthes — fourniture et pose', lot:'Revêtements de sols', unit:'ml', calcType:'linear', materialCost:5, laborCost:5.5, equipmentCost:0.5, subcontractCost:0, overheadPercent:8, marginPercent:12 },
+    { id:'lib-beton', code:'OUV-BET-01', name:'Béton armé — fourniture et mise en œuvre', lot:'Gros œuvre', unit:'m³', calcType:'volume_m3', materialCost:150, laborCost:65, equipmentCost:30, subcontractCost:0, overheadPercent:10, marginPercent:12 }
+  ];
+}
+
+function renderLibrary() {
+  const grid = document.getElementById('library-grid');
+  const count = document.getElementById('library-count');
+  if (!grid || !count) return;
+  count.textContent = `${state.library.items.length} ouvrage${state.library.items.length > 1 ? 's' : ''} prêt${state.library.items.length > 1 ? 's' : ''} à être utilisé${state.library.items.length > 1 ? 's' : ''}.`;
+  grid.innerHTML = state.library.items.map(item => {
+    const temp = normalizeEstimateItem({ ...item, useCostBreakdown:true });
+    const pu = detailedUnitPrice(temp);
+    return `<article class="library-card" data-library-id="${escapeHtml(item.id)}">
+      <div class="library-card-top">
+        <div><div class="library-code">${escapeHtml(item.code)}</div><h4>${escapeHtml(item.name)}</h4></div>
+        <span class="status-badge status-ok">${escapeHtml(normalizeUnit(item.unit))}</span>
+      </div>
+      <div class="library-meta"><span>${escapeHtml(item.lot)}</span><span>${escapeHtml(calcMeta(item.calcType).formula)}</span><span>P.U. ${formatMoney(pu)}</span></div>
+      <div class="library-costs">
+        <span>Matériaux <strong>${formatMoney(item.materialCost)}</strong></span>
+        <span>Main-d’œuvre <strong>${formatMoney(item.laborCost)}</strong></span>
+        <span>Matériel <strong>${formatMoney(item.equipmentCost)}</strong></span>
+        <span>Marge <strong>${formatNumber(item.marginPercent)} %</strong></span>
+      </div>
+      <div class="library-actions">
+        <button class="btn-primary" style="width:auto;min-width:0" type="button" data-library-action="use">＋ Ajouter au métré</button>
+        <button class="btn-secondary" type="button" data-library-action="edit">Modifier</button>
+        <button class="btn-secondary" type="button" data-library-action="delete">Supprimer</button>
+      </div>
+    </article>`;
+  }).join('') || '<div class="bpu-empty">Aucun ouvrage. Ajoutez un modèle pour constituer votre bibliothèque.</div>';
+}
+
+function addLibraryItem() {
+  const index = state.library.items.length + 1;
+  state.library.items.push({
+    id:`lib-${Date.now()}`, code:`OUV-${String(index).padStart(3,'0')}`, name:'Nouvel ouvrage', lot:'Lot non classé',
+    unit:'m²', calcType:'direct_m2', materialCost:0, laborCost:0, equipmentCost:0, subcontractCost:0, overheadPercent:8, marginPercent:10
+  });
+  renderLibrary();
+}
+
+function editLibraryItem(id) {
+  const item = state.library.items.find(x => x.id === id);
+  if (!item) return;
+  const name = prompt('Désignation de l’ouvrage', item.name); if (name === null) return;
+  const code = prompt('Référence / code', item.code); if (code === null) return;
+  const lot = prompt('Lot', item.lot); if (lot === null) return;
+  const unit = prompt('Unité : m², ml, m, m³ ou u', item.unit); if (unit === null) return;
+  const calcType = calcTypeFromUnit(unit);
+  const material = prompt('Coût matériaux par unité (€)', item.materialCost); if (material === null) return;
+  const labor = prompt('Coût main-d’œuvre par unité (€)', item.laborCost); if (labor === null) return;
+  const equipment = prompt('Coût matériel par unité (€)', item.equipmentCost); if (equipment === null) return;
+  const subcontract = prompt('Sous-traitance par unité (€)', item.subcontractCost); if (subcontract === null) return;
+  const overhead = prompt('Frais généraux (%)', item.overheadPercent); if (overhead === null) return;
+  const margin = prompt('Marge (%)', item.marginPercent); if (margin === null) return;
+  Object.assign(item, {
+    name:name.trim() || item.name, code:code.trim(), lot:lot.trim() || 'Lot non classé', unit:normalizeUnit(unit), calcType,
+    materialCost:safeNumber(material), laborCost:safeNumber(labor), equipmentCost:safeNumber(equipment), subcontractCost:safeNumber(subcontract),
+    overheadPercent:safeNumber(overhead), marginPercent:safeNumber(margin)
+  });
+  renderLibrary();
+}
+
+function addLibraryWorkToEstimate(id) {
+  const item = state.library.items.find(x => x.id === id);
+  if (!item) return;
+  const line = normalizeEstimateItem({
+    ...item,
+    libraryId:item.id,
+    directQty:0,
+    useCostBreakdown:true,
+    priceSource:'manual',
+    status:'À vérifier'
+  }, getMeterLines().length);
+  getMeterLines().push(line);
+  if (!document.getElementById('generate-results')?.classList.contains('show')) {
+    displayGenerateResults({ items:getMeterLines() });
+  } else {
+    renderMeterLines();
+  }
+  switchWorkflow('generate', document.querySelector('[data-workflow="generate"]'));
+}
+
+// =============================
+// V7 — DQE / DPGF
+// =============================
+function currentTaxRate() {
+  return safeNumber(document.getElementById('tax-rate')?.value ?? 20);
+}
+
+function syncProjectFields() {
+  const map = {
+    name:['dqe-project-name','project-name'],
+    client:['dqe-client','project-client'],
+    reference:['dqe-reference','project-reference'],
+    address:['dqe-address','project-address'],
+    date:['dqe-date','project-date'],
+    status:['project-status']
+  };
+  Object.entries(map).forEach(([field, ids]) => ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && document.activeElement !== el) el.value = state.currentProject[field] || '';
+  }));
+}
+
+function dqeRows() {
+  return getMeterLines().map((line, idx) => ({
+    index:idx + 1,
+    lot:line.lot || 'Lot non classé',
+    code:line.bpuCode || '',
+    name:line.name,
+    unit:calcMeta(line.calcType).unit,
+    qty:calculateQty(line),
+    pu:getLineUnitPrice(line),
+    amount:getLineAmount(line),
+    status:line.status || ''
+  }));
+}
+
+function renderDqe() {
+  syncProjectFields();
+  const container = document.getElementById('dqe-table-container');
+  const count = document.getElementById('dqe-row-count');
+  if (!container || !count) return;
+  const rows = dqeRows();
+  count.textContent = `${rows.length} poste${rows.length > 1 ? 's' : ''}`;
+  if (!rows.length) {
+    container.innerHTML = '<div class="bpu-empty">Aucun poste de métré. Générez une estimation ou ajoutez des ouvrages avant de créer le DQE/DPGF.</div>';
+    return;
+  }
+  const groups = {};
+  rows.forEach(r => (groups[r.lot] ||= []).push(r));
+  let body = '';
+  let grand = 0;
+  Object.entries(groups).forEach(([lot, list]) => {
+    const lotTotal = list.reduce((s,r)=>s+r.amount,0);
+    grand += lotTotal;
+    body += `<tr class="lot-row"><td colspan="8">${escapeHtml(lot)}</td></tr>`;
+    list.forEach(r => {
+      body += `<tr><td>${r.index}</td><td>${escapeHtml(r.code)}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.unit)}</td><td class="num">${formatNumber(r.qty)}</td><td class="num">${formatMoney(r.pu)}</td><td class="num">${formatMoney(r.amount)}</td><td>${escapeHtml(r.status)}</td></tr>`;
+    });
+    body += `<tr class="lot-total"><td colspan="6">Sous-total ${escapeHtml(lot)}</td><td class="num">${formatMoney(lotTotal)}</td><td></td></tr>`;
+  });
+  const tax = grand * currentTaxRate() / 100;
+  container.innerHTML = `<div class="table-shell"><table class="pro-table">
+    <thead><tr><th>N°</th><th>Réf.</th><th>Désignation</th><th>Unité</th><th class="num">Quantité</th><th class="num">P.U. HT</th><th class="num">Montant HT</th><th>Statut</th></tr></thead>
+    <tbody>${body}
+      <tr class="grand-total"><td colspan="6">TOTAL HT</td><td class="num">${formatMoney(grand)}</td><td></td></tr>
+      <tr><td colspan="6">TVA / taxe ${formatNumber(currentTaxRate())} %</td><td class="num">${formatMoney(tax)}</td><td></td></tr>
+      <tr class="grand-total"><td colspan="6">TOTAL TTC</td><td class="num">${formatMoney(grand + tax)}</td><td></td></tr>
+    </tbody></table></div>`;
+}
+
+function exportDqeExcel() {
+  if (!window.XLSX) { alert('Le module Excel n’est pas disponible.'); return; }
+  const type = document.getElementById('dqe-document-type')?.value || 'DQE';
+  const rows = dqeRows();
+  if (!rows.length) { alert('Aucun poste à exporter.'); return; }
+  const aoa = [
+    [type, state.currentProject.name || 'Projet sans nom'],
+    ['Client', state.currentProject.client || ''],
+    ['Référence', state.currentProject.reference || ''],
+    ['Adresse', state.currentProject.address || ''],
+    ['Date', state.currentProject.date || ''],
+    [],
+    ['Lot','Référence','Désignation','Unité','Quantité','P.U. HT','Montant HT','Statut']
+  ];
+  rows.forEach(r => aoa.push([r.lot,r.code,r.name,r.unit,r.qty,r.pu,r.amount,r.status]));
+  const total = rows.reduce((s,r)=>s+r.amount,0);
+  aoa.push([],['','','','','','TOTAL HT',total,'']);
+  aoa.push(['','','','','',`TVA ${currentTaxRate()} %`,total*currentTaxRate()/100,'']);
+  aoa.push(['','','','','','TOTAL TTC',total*(1+currentTaxRate()/100),'']);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:22},{wch:14},{wch:46},{wch:10},{wch:12},{wch:14},{wch:16},{wch:18}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, type);
+  const safeName = (state.currentProject.name || 'projet').replace(/[^a-z0-9_-]+/gi,'_');
+  XLSX.writeFile(wb, `${type}_${safeName}.xlsx`);
+}
+
+function printDqe() {
+  renderDqe();
+  document.body.classList.add('print-dqe');
+  const cleanup = () => document.body.classList.remove('print-dqe');
+  window.addEventListener('afterprint', cleanup, { once:true });
+  window.print();
+  setTimeout(cleanup, 1500);
+}
+
+// =============================
+// V7 — PROJETS & AVENANTS
+// =============================
+const PROJECT_STORAGE_KEY = 'moe-chiffrage-v7-projects';
+
+function loadProjectsStorage() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PROJECT_STORAGE_KEY) || '[]');
+    state.projects = Array.isArray(raw) ? raw : [];
+  } catch { state.projects = []; }
+}
+
+function persistProjects() {
+  try { localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(state.projects)); } catch {}
+}
+
+function meterTotalHT(lines = getMeterLines()) {
+  return (lines || []).reduce((sum, line) => {
+    const normalized = normalizeEstimateItem(line);
+    return sum + getLineAmount(normalized);
+  }, 0);
+}
+
+function amendmentDelta(amendments = state.currentProject.amendments || []) {
+  return amendments.reduce((sum, a) => sum + (a.type === 'minus' ? -1 : 1) * safeNumber(a.amount), 0);
+}
+
+function addAmendment() {
+  state.currentProject.amendments ||= [];
+  state.currentProject.amendments.push({ id:`av-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, type:'plus', label:'Travaux supplémentaires', amount:0 });
+  renderAmendments();
+}
+
+function renderAmendments() {
+  const list = document.getElementById('amendments-list');
+  const kpis = document.getElementById('project-kpis');
+  if (!list || !kpis) return;
+  const base = meterTotalHT();
+  const delta = amendmentDelta();
+  const revised = base + delta;
+  const tax = revised * currentTaxRate() / 100;
+  kpis.innerHTML = `
+    <div class="kpi"><span>Marché / estimation de base HT</span><strong>${formatMoney(base)}</strong></div>
+    <div class="kpi"><span>Solde des avenants HT</span><strong>${delta < 0 ? '− ' : '+ '}${formatMoney(Math.abs(delta))}</strong></div>
+    <div class="kpi"><span>Nouveau total HT</span><strong>${formatMoney(revised)}</strong></div>
+    <div class="kpi"><span>Nouveau total TTC</span><strong>${formatMoney(revised + tax)}</strong></div>`;
+  list.innerHTML = (state.currentProject.amendments || []).map(a => `<div class="amendment-row" data-amendment-id="${escapeHtml(a.id)}">
+    <select data-amendment-field="type"><option value="plus" ${a.type==='plus'?'selected':''}>Plus-value</option><option value="minus" ${a.type==='minus'?'selected':''}>Moins-value</option></select>
+    <input data-amendment-field="label" value="${escapeHtml(a.label)}" placeholder="Objet de l’avenant">
+    <input data-amendment-field="amount" type="number" min="0" step="0.01" value="${a.amount || ''}" placeholder="Montant HT">
+    <button class="bpu-delete" type="button" data-amendment-action="delete">×</button>
+  </div>`).join('') || '<div class="bpu-empty">Aucun avenant pour le projet courant.</div>';
+}
+
+function newCurrentProject() {
+  state.currentProject = { id:'', name:'', client:'', reference:'', address:'', date:new Date().toISOString().slice(0,10), status:'Étude', amendments:[] };
+  state.generate.meterLines = [];
+  syncProjectFields();
+  renderAmendments();
+  const res = document.getElementById('generate-results');
+  if (res) { res.classList.remove('show'); res.innerHTML = ''; }
+}
+
+function saveCurrentProject() {
+  const project = {
+    ...state.currentProject,
+    id: state.currentProject.id || `project-${Date.now()}`,
+    savedAt:new Date().toISOString(),
+    taxRate:currentTaxRate(),
+    meterLines:JSON.parse(JSON.stringify(getMeterLines())),
+    bpuFileName:state.bpu.fileName || '',
+    bpuItems:JSON.parse(JSON.stringify(state.bpu.items || [])),
+    baseHT:meterTotalHT()
+  };
+  state.currentProject.id = project.id;
+  const idx = state.projects.findIndex(p => p.id === project.id);
+  if (idx >= 0) state.projects[idx] = project; else state.projects.unshift(project);
+  persistProjects();
+  renderProjects();
+  alert('Projet enregistré.');
+}
+
+function loadProject(id) {
+  const project = state.projects.find(p => p.id === id);
+  if (!project) return;
+  state.currentProject = {
+    id:project.id, name:project.name || '', client:project.client || '', reference:project.reference || '',
+    address:project.address || '', date:project.date || '', status:project.status || 'Étude',
+    amendments:JSON.parse(JSON.stringify(project.amendments || []))
+  };
+  state.generate.meterLines = (project.meterLines || []).map(normalizeEstimateItem);
+  if (Array.isArray(project.bpuItems) && project.bpuItems.length) {
+    state.bpu.items = project.bpuItems.map(makeBpuItem);
+    state.bpu.fileName = project.bpuFileName || 'BPU du projet';
+    renderBpu();
+  }
+  if (!document.getElementById('generate-results')?.classList.contains('show')) {
+    displayGenerateResults({ items:state.generate.meterLines });
+  } else {
+    renderMeterLines();
+  }
+  const taxInput = document.getElementById('tax-rate');
+  if (taxInput) taxInput.value = safeNumber(project.taxRate ?? 20);
+  syncProjectFields();
+  renderProjects();
+  switchWorkflow('generate', document.querySelector('[data-workflow="generate"]'));
+}
+
+function deleteProject(id) {
+  state.projects = state.projects.filter(p => p.id !== id);
+  persistProjects();
+  renderProjects();
+}
+
+function renderProjects() {
+  syncProjectFields();
+  renderAmendments();
+  const list = document.getElementById('projects-list');
+  const count = document.getElementById('projects-count');
+  if (!list || !count) return;
+  count.textContent = state.projects.length ? `${state.projects.length} projet${state.projects.length > 1 ? 's' : ''} enregistré${state.projects.length > 1 ? 's' : ''}.` : 'Aucun projet enregistré.';
+  list.innerHTML = state.projects.map(p => {
+    const base = safeNumber(p.baseHT);
+    const delta = (p.amendments || []).reduce((s,a)=>s+(a.type==='minus'?-1:1)*safeNumber(a.amount),0);
+    return `<article class="project-card" data-project-id="${escapeHtml(p.id)}">
+      <div><h4>${escapeHtml(p.name || 'Projet sans nom')}</h4><p>${escapeHtml(p.reference || 'Sans référence')} · ${escapeHtml(p.client || 'Client non renseigné')} · ${escapeHtml(p.status || 'Étude')} · ${formatMoney(base + delta)} HT</p></div>
+      <div class="project-actions">
+        <button class="btn-secondary" type="button" data-project-action="load">Ouvrir</button>
+        <button class="btn-secondary" type="button" data-project-action="delete">Supprimer</button>
+      </div>
+    </article>`;
+  }).join('') || '<div class="bpu-empty">Enregistrez le projet courant pour le retrouver ici.</div>';
+}
+
+function initFeatureModules() {
+  state.library.items = defaultLibraryItems();
+  loadProjectsStorage();
+  renderLibrary();
+  renderProjects();
+  syncProjectFields();
+
+  document.getElementById('library-demo-btn')?.addEventListener('click', () => { state.library.items = defaultLibraryItems(); renderLibrary(); });
+  document.getElementById('library-add-btn')?.addEventListener('click', addLibraryItem);
+  document.getElementById('library-grid')?.addEventListener('click', e => {
+    const card = e.target.closest('[data-library-id]'); if (!card) return;
+    const action = e.target.closest('[data-library-action]')?.dataset.libraryAction;
+    if (action === 'use') addLibraryWorkToEstimate(card.dataset.libraryId);
+    if (action === 'edit') editLibraryItem(card.dataset.libraryId);
+    if (action === 'delete') { state.library.items = state.library.items.filter(x => x.id !== card.dataset.libraryId); renderLibrary(); }
+  });
+
+  document.querySelectorAll('[data-project-field]').forEach(el => {
+    el.addEventListener('input', () => {
+      state.currentProject[el.dataset.projectField] = el.value;
+      syncProjectFields();
+    });
+    el.addEventListener('change', () => {
+      state.currentProject[el.dataset.projectField] = el.value;
+      syncProjectFields();
+    });
+  });
+
+  document.getElementById('dqe-refresh-btn')?.addEventListener('click', renderDqe);
+  document.getElementById('dqe-excel-btn')?.addEventListener('click', exportDqeExcel);
+  document.getElementById('dqe-pdf-btn')?.addEventListener('click', printDqe);
+  document.getElementById('dqe-document-type')?.addEventListener('change', renderDqe);
+
+  document.getElementById('project-new-btn')?.addEventListener('click', newCurrentProject);
+  document.getElementById('project-save-btn')?.addEventListener('click', saveCurrentProject);
+  document.getElementById('amendment-add-btn')?.addEventListener('click', addAmendment);
+
+  document.getElementById('amendments-list')?.addEventListener('input', e => {
+    const row = e.target.closest('[data-amendment-id]'); if (!row) return;
+    const a = (state.currentProject.amendments || []).find(x => x.id === row.dataset.amendmentId); if (!a) return;
+    const field = e.target.dataset.amendmentField; if (!field) return;
+    a[field] = field === 'amount' ? safeNumber(e.target.value) : e.target.value;
+    renderAmendments();
+  });
+  document.getElementById('amendments-list')?.addEventListener('change', e => {
+    const row = e.target.closest('[data-amendment-id]'); if (!row) return;
+    const a = (state.currentProject.amendments || []).find(x => x.id === row.dataset.amendmentId); if (!a) return;
+    const field = e.target.dataset.amendmentField; if (field) a[field] = field === 'amount' ? safeNumber(e.target.value) : e.target.value;
+    renderAmendments();
+  });
+  document.getElementById('amendments-list')?.addEventListener('click', e => {
+    if (!e.target.closest('[data-amendment-action="delete"]')) return;
+    const row = e.target.closest('[data-amendment-id]'); if (!row) return;
+    state.currentProject.amendments = (state.currentProject.amendments || []).filter(x => x.id !== row.dataset.amendmentId);
+    renderAmendments();
+  });
+
+  document.getElementById('projects-list')?.addEventListener('click', e => {
+    const card = e.target.closest('[data-project-id]'); if (!card) return;
+    const action = e.target.closest('[data-project-action]')?.dataset.projectAction;
+    if (action === 'load') loadProject(card.dataset.projectId);
+    if (action === 'delete') deleteProject(card.dataset.projectId);
+  });
+}
+
+initBpuUI();
+initFeatureModules();
+
 </script>
 </body>
 </html>
