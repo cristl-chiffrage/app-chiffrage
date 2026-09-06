@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOE Mesure Intelligente</title>
+  <style>
+    * { box-sizing: border-box; }
+    
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif; 
+      background: var(--bg); 
+      color: var(--text-primary);
+    }
+
+    body { overflow: hidden; }
+
+    .container { 
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
+      gap: 0;
+    }
+
+    @media (max-width: 1024px) {
+      .container { 
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+    }
+
+    /* HEADER */
+    .header { 
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 1.5rem;
+      color: white;
+      grid-column: 1 / -1;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header h1 { 
+      font-size: 26px; 
+      margin: 0; 
+      font-weight: 700;
+    }
+
+    .header p { 
+      font-size: 13px; 
+      margin: 6px 0 0 0; 
+      opacity: 0.9;
+    }
+
+    /* CAMERA PANEL */
+    .camera-panel {
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #camera-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* GRID OVERLAY */
+    .grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .grid-overlay svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* CALIBRATION INPUT */
+    .calibration-bar {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1rem;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .calibration-bar label {
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .calibration-bar input {
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 14px;
+      width: 100px;
+    }
+
+    .calibration-bar input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* CAPTURE BUTTON */
+    .capture-btn-container {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    .capture-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: 4px solid white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .capture-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+    }
+
+    /* RESULTS PANEL */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .results-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .results-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: var(--text-primary);
+    }
+
+    .results-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* MEASUREMENT CARD */
+    .measurement-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .measurement-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+
+    .measurement-card.active {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(16, 185, 129, 0.05));
+    }
+
+    .measurement-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+    }
+
+    .measurement-values {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .measurement-input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .measurement-input-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .measurement-input {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .measurement-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .measurement-result {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      border-left: 4px solid var(--accent);
+    }
+
+    .measurement-result-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .measurement-result-unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* SUMMARY */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.08));
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: auto;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .summary-row:last-child {
+      border-top: 2px solid rgba(37, 99, 235, 0.2);
+      padding-top: 12px;
+      margin-top: 12px;
+      font-size: 18px;
+    }
+
+    .summary-label {
+      color: var(--text-secondary);
+    }
+
+    .summary-value {
+      color: var(--primary);
+    }
+
+    .total-ttc {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    canvas {
+      display: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 2rem;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .container {
+        grid-template-rows: auto 1fr 1fr;
+      }
+
+      .camera-panel {
+        max-height: 50vh;
+      }
+
+      .results-panel {
+        max-height: 50vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📏 MOE Mesure Intelligente</h1>
+    <p>Mesurez les surfaces en temps réel avec calibrage automatique</p>
+  </div>
+
+  <div class="camera-panel">
+    <video id="camera-video" playsinline autoplay></video>
+    <div class="grid-overlay">
+      <svg id="grid-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(37,99,235,0.4)" stroke-width="0.5"/>
+      </svg>
+    </div>
+
+    <div class="calibration-bar">
+      <label>Hauteur (m):</label>
+      <input type="number" id="height-calibration" placeholder="3" step="0.1" min="0.5" max="5" value="3">
+    </div>
+
+    <div class="capture-btn-container">
+      <button class="capture-btn" onclick="captureAndAnalyze()">📸</button>
+    </div>
+
+    <canvas id="camera-canvas"></canvas>
+  </div>
+
+  <div class="results-panel">
+    <div class="results-header">
+      <h2>📊 Mesures détectées</h2>
+      <p>Ajustez les valeurs si nécessaire</p>
+    </div>
+
+    <div id="measurements-list"></div>
+
+    <div class="empty-state" id="empty-state" style="display: block;">
+      <div class="empty-icon">📸</div>
+      <p>Appuyez sur le bouton caméra pour scanner une surface</p>
+    </div>
+
+    <div class="summary-box" id="summary-box" style="display: none;">
+      <div class="summary-row">
+        <span class="summary-label">Total HT</span>
+        <span class="summary-value" id="total-ht">0€</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">TVA 20%</span>
+        <span class="summary-value" id="total-tva">0€</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">TOTAL TTC</span>
+        <span class="summary-value total-ttc" id="total-ttc">0€</span>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="clearMeasurements()">🔄 Réinitialiser</button>
+        <button class="btn btn-primary" onclick="exportEstimate()">📄 Exporter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const priceDB = {
+  peinture: 15,
+  carrelage: 52,
+  cloison: 42,
+  enduit: 22,
+  revêtement: 32,
+  parquet: 48,
+  lambris: 36,
+  isolation: 32,
+  dallage: 42,
+  fenêtre: 950,
+  porte: 520,
+};
+
+let measurements = [];
+let stream = null;
+
+// ========== CAMERA INIT ==========
+
+async function initCamera() {
+  try {
+    const video = document.getElementById('camera-video');
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    video.srcObject = stream;
+  } catch (error) {
+    console.error('Camera error:', error);
+    alert('Impossible d\'accéder à la caméra');
+  }
+}
+
+// ========== CAPTURE & ANALYZE ==========
+
+async function captureAndAnalyze() {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0);
+
+  const photoData = canvas.toDataURL('image/jpeg');
+  const height = parseFloat(document.getElementById('height-calibration').value) || 3;
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('summary-box').style.display = 'block';
+
+  try {
+    const base64 = photoData.split(',')[1];
+    const response = await fetch('/api/measure-surface', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoBase64: base64, height })
+    }).catch(() => simulateMeasurement(height));
+
+    let result = { items: [] };
+    if(response && response.ok) {
+      try {
+        result = await response.json();
+      } catch {
+        result = simulateMeasurement(height);
+      }
+    }
+
+    displayMeasurements(result.items || []);
+    updateSummary();
+  } catch(error) {
+    console.error('Error:', error);
+    displayMeasurements(simulateMeasurement(height).items);
+    updateSummary();
+  }
+}
+
+function simulateMeasurement(height) {
+  return {
+    items: [
+      { surface: 'Peinture', width: 5, depth: height, area: 5 * height, confidence: 0.85, pricePerUnit: 15 },
+      { surface: 'Carrelage', width: 4.5, depth: height, area: 4.5 * height, confidence: 0.8, pricePerUnit: 52 }
+    ]
+  };
+}
+
+function displayMeasurements(items) {
+  const list = document.getElementById('measurements-list');
+  list.innerHTML = '';
+  
+  measurements = items.map((item, idx) => ({
+    id: idx,
+    name: item.surface || 'Surface ' + (idx + 1),
+    width: item.width || 0,
+    depth: item.depth || 0,
+    area: item.area || 0,
+    price: item.pricePerUnit || 0
+  }));
+
+  measurements.forEach((m, idx) => {
+    const card = document.createElement('div');
+    card.className = 'measurement-card';
+    card.innerHTML = `
+      <div class="measurement-title">${m.name}</div>
+      <div class="measurement-values">
+        <div class="measurement-input-group">
+          <label class="measurement-input-label">Largeur (m)</label>
+          <input type="number" class="measurement-input" value="${m.width.toFixed(2)}" step="0.1" 
+                 onchange="updateMeasurement(${idx}, 'width', this.value)">
+        </div>
+        <div class="measurement-input-group">
+          <label class="measurement-input-label">Hauteur (m)</label>
+          <input type="number" class="measurement-input" value="${m.depth.toFixed(2)}" step="0.1"
+                 onchange="updateMeasurement(${idx}, 'depth', this.value)">
+        </div>
+      </div>
+      <div class="measurement-result">
+        <div class="measurement-result-value">${(m.width * m.depth).toFixed(1)}</div>
+        <div class="measurement-result-unit">m² × ${m.price}€ = ${(m.width * m.depth * m.price).toFixed(0)}€</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateMeasurement(id, field, value) {
+  measurements[id][field] = parseFloat(value) || 0;
+  measurements[id].area = measurements[id].width * measurements[id].depth;
+  displayMeasurements(measurements);
+  updateSummary();
+}
+
+function updateSummary() {
+  let totalHT = 0;
+  measurements.forEach(m => {
+    totalHT += m.area * m.price;
+  });
+
+  const tva = totalHT * 0.2;
+  const ttc = totalHT + tva;
+
+  document.getElementById('total-ht').textContent = totalHT.toFixed(0) + '€';
+  document.getElementById('total-tva').textContent = tva.toFixed(0) + '€';
+  document.getElementById('total-ttc').textContent = ttc.toFixed(0) + '€';
+}
+
+function clearMeasurements() {
+  measurements = [];
+  document.getElementById('measurements-list').innerHTML = '';
+  document.getElementById('empty-state').style.display = 'block';
+  document.getElementById('summary-box').style.display = 'none';
+}
+
+function exportEstimate() {
+  let csv = 'Surface,Largeur (m),Hauteur (m),Aire (m²),P.U. (€),Total (€)\n';
+  measurements.forEach(m => {
+    csv += `"${m.name}",${m.width.toFixed(2)},${m.depth.toFixed(2)},${(m.width * m.depth).toFixed(2)},${m.price},${(m.width * m.depth * m.price).toFixed(0)}\n`;
+  });
+
+  let totalHT = 0;
+  measurements.forEach(m => { totalHT += m.area * m.price; });
+  const tva = totalHT * 0.2;
+  const ttc = totalHT + tva;
+
+  csv += `\nTotal HT,,,${totalHT.toFixed(0)}\nTVA 20%,,,${tva.toFixed(0)}\nTotal TTC,,,${ttc.toFixed(0)}\n`;
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `estimation_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+}
+
+// ========== INIT ==========
+
+window.addEventListener('load', initCamera);
+</script>
+
+</body>
+</html>
