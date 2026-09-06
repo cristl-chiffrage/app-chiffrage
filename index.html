@@ -943,6 +943,179 @@
       body.print-dqe .field-card, body.print-dqe .subsection { box-shadow:none; break-inside:avoid; }
     }
 
+
+    /* V8 — MÉTRÉ LIVE CAMÉRA */
+    .camera-live-overlay {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      z-index:4;
+      touch-action:none;
+      cursor:crosshair;
+    }
+    .camera-live-hud {
+      position:absolute;
+      top:18px;
+      left:18px;
+      right:18px;
+      z-index:6;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:none;
+    }
+    .live-status-bar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .live-status {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      max-width:100%;
+      color:#fff;
+      background:rgba(2,6,23,.78);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:11px;
+      font-weight:850;
+    }
+    .live-dot {
+      width:8px;height:8px;border-radius:50%;
+      background:#f59e0b;
+      box-shadow:0 0 0 4px rgba(245,158,11,.18);
+      flex:0 0 auto;
+    }
+    .live-dot.ok { background:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,.18); }
+    .live-dot.error { background:#ef4444; box-shadow:0 0 0 4px rgba(239,68,68,.18); }
+    .live-confidence {
+      color:#fff;
+      background:rgba(2,6,23,.78);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:11px;
+      font-weight:850;
+    }
+    .live-metrics {
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:7px;
+      max-width:900px;
+    }
+    .live-metric {
+      color:#fff;
+      background:rgba(2,6,23,.78);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:8px 9px;
+      min-width:0;
+    }
+    .live-metric span { display:block; font-size:9px; color:rgba(255,255,255,.72); font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+    .live-metric strong { display:block; margin-top:2px; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .camera-live-panel {
+      position:absolute;
+      left:16px;
+      right:16px;
+      bottom:16px;
+      z-index:7;
+      background:rgba(2,6,23,.88);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;
+      padding:12px;
+      color:#fff;
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr auto;
+      gap:9px;
+      align-items:end;
+    }
+    .camera-live-panel label {
+      display:block;
+      color:rgba(255,255,255,.68);
+      font-size:9px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      margin-bottom:5px;
+    }
+    .camera-live-panel input,
+    .camera-live-panel select {
+      width:100%;
+      min-height:38px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border-radius:10px;
+      padding:8px 9px;
+      outline:none;
+      font-size:12px;
+    }
+    .camera-live-panel select option { color:#111827; background:#fff; }
+    .live-actions { display:flex; gap:7px; flex-wrap:wrap; }
+    .live-action-btn {
+      min-height:38px;
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      background:rgba(255,255,255,.09);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:10px;
+      font-weight:850;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .live-action-btn.primary { background:#2563eb; border-color:#3b82f6; }
+    .live-action-btn.active { background:#0f766e; border-color:#14b8a6; }
+    .live-action-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .live-help {
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:46%;
+      z-index:5;
+      color:#fff;
+      background:rgba(2,6,23,.70);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:8px 11px;
+      font-size:10px;
+      font-weight:800;
+      pointer-events:none;
+      text-align:center;
+      max-width:82%;
+    }
+    .live-hidden { display:none !important; }
+    .live-source-chip {
+      display:inline-flex;align-items:center;gap:6px;
+      border-radius:999px;padding:4px 7px;
+      font-size:9px;font-weight:900;
+      background:rgba(37,99,235,.18);
+      border:1px solid rgba(96,165,250,.28);
+    }
+    @media (max-width: 760px) {
+      .camera-live-hud { top:10px;left:10px;right:10px; }
+      .live-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .live-metric strong { font-size:12px; }
+      .camera-live-panel {
+        left:8px;right:8px;bottom:8px;
+        grid-template-columns:1fr 1fr;
+        gap:7px;
+        padding:9px;
+      }
+      .live-actions { grid-column:1 / -1; }
+      .live-action-btn { flex:1 1 auto; }
+    }
+
     /* CAMERA */
     .camera-modal {
       display:none;
@@ -1037,7 +1210,7 @@
       <div class="hero-card">
         <div class="hero-kicker">IA · Chiffrage · Vérification terrain</div>
         <h1>Mesurez, contrôlez.<br>Chiffrez avec votre BPU.</h1>
-        <p>Importez un devis, une photo et votre BPU. Métrés avancés, ouvrages composés, décomposition des coûts, DQE/DPGF et suivi des avenants réunis dans un même outil.</p>
+        <p>Visez, mesurez et chiffrez : métrés live sur caméra, BPU, ouvrages composés, DQE/DPGF et suivi des avenants réunis dans un même outil.</p>
       </div>
       <aside class="hero-side" aria-label="Fonctionnement">
         <div class="hero-side-title">Flux de travail</div>
@@ -1360,16 +1533,61 @@
   </main>
 </div>
 
-<!-- CAMERA MODAL -->
-<div id="camera-modal" class="camera-modal" role="dialog" aria-modal="true" aria-label="Caméra">
-  <div class="camera-container">
+<!-- CAMERA MODAL — V8 MÉTRÉ LIVE -->
+<div id="camera-modal" class="camera-modal" role="dialog" aria-modal="true" aria-label="Caméra et métré live">
+  <div class="camera-container" id="camera-container">
     <video id="camera-video" playsinline autoplay></video>
     <canvas id="camera-canvas"></canvas>
+    <canvas id="camera-live-overlay" class="camera-live-overlay" aria-label="Zone de mesure live"></canvas>
     <div class="camera-guide" aria-hidden="true"></div>
+
+    <div id="camera-live-hud" class="camera-live-hud">
+      <div class="live-status-bar">
+        <div class="live-status"><span id="live-status-dot" class="live-dot"></span><span id="live-status-text">Initialisation du métré live…</span></div>
+        <div id="live-confidence" class="live-confidence">Confiance —</div>
+      </div>
+      <div class="live-metrics" aria-live="polite">
+        <div class="live-metric"><span>Longueur</span><strong id="live-length">— m</strong></div>
+        <div class="live-metric"><span>Largeur</span><strong id="live-width">— m</strong></div>
+        <div class="live-metric"><span>Hauteur</span><strong id="live-height">— m</strong></div>
+        <div class="live-metric"><span>Surface</span><strong id="live-area">— m²</strong></div>
+        <div class="live-metric"><span>Linéaire</span><strong id="live-linear">— ml</strong></div>
+        <div class="live-metric"><span>Volume</span><strong id="live-volume">— m³</strong></div>
+      </div>
+    </div>
+
+    <div id="live-help" class="live-help live-hidden"></div>
+
+    <div id="camera-live-panel" class="camera-live-panel">
+      <div>
+        <label for="live-measure-type">Type de mesure</label>
+        <select id="live-measure-type">
+          <option value="wall">Mur / façade</option>
+          <option value="floor">Sol / plafond</option>
+          <option value="linear">Linéaire</option>
+          <option value="room">Pièce / volume</option>
+        </select>
+      </div>
+      <div>
+        <label for="live-reference-m">Référence connue (m)</label>
+        <input id="live-reference-m" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Ex. 0,90">
+      </div>
+      <div>
+        <label for="live-third-dimension">3e dimension (m)</label>
+        <input id="live-third-dimension" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 2,50">
+      </div>
+      <div class="live-actions">
+        <button class="live-action-btn primary" id="live-auto-btn" type="button">IA Live : ON</button>
+        <button class="live-action-btn" id="live-calibrate-btn" type="button">Calibrer</button>
+        <button class="live-action-btn" id="live-zone-btn" type="button">Mesurer zone</button>
+        <button class="live-action-btn" id="live-add-btn" type="button" disabled>＋ Au métré</button>
+      </div>
+    </div>
   </div>
+
   <div class="camera-controls">
     <button class="camera-btn btn-close-camera" onclick="closeCamera()" type="button">Annuler</button>
-    <button class="camera-btn btn-capture" onclick="capturePhoto()" type="button">Capturer la photo</button>
+    <button class="camera-btn btn-capture" onclick="capturePhoto()" type="button">Capturer + conserver le métré</button>
   </div>
 </div>
 
@@ -1383,7 +1601,22 @@ const state = {
   currentProject: { id:'', name:'', client:'', reference:'', address:'', date:new Date().toISOString().slice(0,10), status:'Étude', amendments:[] },
   projects: [],
   cameraTarget: null,
-  stream: null
+  stream: null,
+  liveMeter: {
+    enabled: true,
+    analyzing: false,
+    timer: null,
+    result: null,
+    source: '',
+    mode: 'auto',
+    interaction: '',
+    points: [],
+    pixelsPerMeter: 0,
+    referenceMeters: 0,
+    addedToMeter: false,
+    apiAvailable: null,
+    lastErrorAt: 0
+  }
 };
 
 function switchWorkflow(workflow, button) {
@@ -1426,19 +1659,431 @@ function handleDrop(event, inputId) {
   input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-// CAMERA
+// CAMERA — V8 MÉTRÉ LIVE
+function liveNumber(value, digits = 2) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n.toFixed(digits).replace('.', ',') : '—';
+}
+
+function resetLiveMeterState() {
+  stopLiveAnalysisLoop();
+  state.liveMeter.result = null;
+  state.liveMeter.source = '';
+  state.liveMeter.mode = 'auto';
+  state.liveMeter.interaction = '';
+  state.liveMeter.points = [];
+  state.liveMeter.pixelsPerMeter = 0;
+  state.liveMeter.referenceMeters = 0;
+  state.liveMeter.addedToMeter = false;
+  state.liveMeter.apiAvailable = null;
+  updateLiveHud();
+  drawLiveOverlay();
+}
+
+function setLiveStatus(text, type = 'pending') {
+  const txt = document.getElementById('live-status-text');
+  const dot = document.getElementById('live-status-dot');
+  if (txt) txt.textContent = text;
+  if (dot) {
+    dot.className = 'live-dot';
+    if (type === 'ok') dot.classList.add('ok');
+    if (type === 'error') dot.classList.add('error');
+  }
+}
+
+function normalizeLiveAnalysis(data = {}) {
+  const m = data.measurements || data.metrics || data;
+  const n = v => {
+    const x = Number(v);
+    return Number.isFinite(x) && x >= 0 ? x : 0;
+  };
+  const length = n(m.length ?? m.longueur);
+  const width = n(m.width ?? m.largeur);
+  const height = n(m.height ?? m.hauteur);
+  let area = n(m.area ?? m.surface ?? m.areaM2);
+  let linear = n(m.linear ?? m.linearMeters ?? m.ml);
+  let volume = n(m.volume ?? m.volumeM3);
+  if (!area && length && width) area = length * width;
+  if (!area && length && height) area = length * height;
+  if (!linear && length && width) linear = 2 * (length + width);
+  if (!volume && length && width && height) volume = length * width * height;
+  return {
+    length, width, height, area, linear, volume,
+    confidence: Math.max(0, Math.min(1, n(data.confidence ?? m.confidence))),
+    objectType: data.objectType || data.type || data.label || 'Zone mesurée',
+    unit: data.unit || 'm',
+    overlay: data.overlay || data.box || null,
+    raw: data
+  };
+}
+
+function updateLiveHud() {
+  const r = state.liveMeter.result || {};
+  const set = (id, value, unit) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${liveNumber(value)} ${unit}`;
+  };
+  set('live-length', r.length, 'm');
+  set('live-width', r.width, 'm');
+  set('live-height', r.height, 'm');
+  set('live-area', r.area, 'm²');
+  set('live-linear', r.linear, 'ml');
+  set('live-volume', r.volume, 'm³');
+  const conf = document.getElementById('live-confidence');
+  if (conf) {
+    const pct = Number(r.confidence) > 0 ? `${Math.round(Number(r.confidence) * 100)} %` : '—';
+    conf.textContent = `Confiance ${pct}`;
+  }
+  const add = document.getElementById('live-add-btn');
+  if (add) add.disabled = !(r.area > 0 || r.linear > 0 || r.volume > 0 || r.length > 0);
+}
+
+function resizeLiveOverlay() {
+  const canvas = document.getElementById('camera-live-overlay');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  const w = Math.max(1, Math.round(rect.width * dpr));
+  const h = Math.max(1, Math.round(rect.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+}
+
+function drawLiveOverlay() {
+  const canvas = document.getElementById('camera-live-overlay');
+  if (!canvas) return;
+  resizeLiveOverlay();
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / Math.max(1, rect.width);
+  const sy = canvas.height / Math.max(1, rect.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.scale(sx, sy);
+
+  const r = state.liveMeter.result;
+  if (r?.overlay) {
+    let { x, y, width, height } = r.overlay;
+    if ([x,y,width,height].every(v => Number.isFinite(Number(v)))) {
+      x = Number(x); y = Number(y); width = Number(width); height = Number(height);
+      if (x <= 1 && y <= 1 && width <= 1 && height <= 1) {
+        x *= rect.width; y *= rect.height; width *= rect.width; height *= rect.height;
+      }
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([9,6]);
+      ctx.strokeRect(x,y,width,height);
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(37,99,235,.12)';
+      ctx.fillRect(x,y,width,height);
+    }
+  }
+
+  const pts = state.liveMeter.points || [];
+  pts.forEach((p, idx) => {
+    ctx.beginPath();
+    ctx.fillStyle = idx === 0 ? '#22c55e' : '#f59e0b';
+    ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+  });
+
+  if (pts.length >= 2) {
+    const a = pts[0], b = pts[1];
+    ctx.strokeStyle = state.liveMeter.interaction === 'calibrate' ? '#22c55e' : '#f59e0b';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(a.x,a.y);
+    ctx.lineTo(b.x,b.y);
+    ctx.stroke();
+
+    if (state.liveMeter.interaction !== 'calibrate') {
+      const x = Math.min(a.x,b.x), y = Math.min(a.y,b.y);
+      const w = Math.abs(b.x-a.x), h = Math.abs(b.y-a.y);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([7,5]);
+      ctx.strokeRect(x,y,w,h);
+      ctx.setLineDash([]);
+    }
+  }
+  ctx.restore();
+}
+
+function showLiveHelp(text) {
+  const el = document.getElementById('live-help');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('live-hidden', !text);
+}
+
+function pointDistance(a,b) {
+  return Math.hypot(b.x-a.x, b.y-a.y);
+}
+
+function setLiveInteraction(mode) {
+  state.liveMeter.interaction = mode;
+  state.liveMeter.points = [];
+  drawLiveOverlay();
+  if (mode === 'calibrate') {
+    const ref = Number(document.getElementById('live-reference-m')?.value);
+    if (!Number.isFinite(ref) || ref <= 0) {
+      state.liveMeter.interaction = '';
+      alert('Indiquez d’abord une dimension réelle de référence, par exemple 0,90 m.');
+      return;
+    }
+    state.liveMeter.referenceMeters = ref;
+    showLiveHelp('Touchez les 2 extrémités de la longueur de référence.');
+    setLiveStatus('Calibration manuelle : 2 points', 'pending');
+  } else if (mode === 'zone') {
+    if (!(state.liveMeter.pixelsPerMeter > 0)) {
+      state.liveMeter.interaction = '';
+      alert('Calibrez d’abord l’image avec une longueur connue.');
+      return;
+    }
+    showLiveHelp('Touchez 2 coins opposés de la zone à mesurer.');
+    setLiveStatus('Mesure manuelle : 2 coins', 'pending');
+  } else {
+    showLiveHelp('');
+  }
+}
+
+function computeManualMeasurement() {
+  const pts = state.liveMeter.points;
+  if (pts.length < 2 || !(state.liveMeter.pixelsPerMeter > 0)) return;
+  const ppm = state.liveMeter.pixelsPerMeter;
+  const dx = Math.abs(pts[1].x - pts[0].x) / ppm;
+  const dy = Math.abs(pts[1].y - pts[0].y) / ppm;
+  const diagonal = pointDistance(pts[0], pts[1]) / ppm;
+  const type = document.getElementById('live-measure-type')?.value || 'wall';
+  const third = Math.max(0, Number(document.getElementById('live-third-dimension')?.value) || 0);
+
+  let result = { length:0,width:0,height:0,area:0,linear:0,volume:0,confidence:.72,objectType:'Mesure calibrée',overlay:null };
+  if (type === 'wall') {
+    result.length = dx;
+    result.height = dy;
+    result.area = dx * dy;
+    result.linear = 2 * (dx + dy);
+    if (third > 0) { result.width = third; result.volume = dx * dy * third; }
+    result.objectType = 'Mur mesuré';
+  } else if (type === 'floor') {
+    result.length = dx;
+    result.width = dy;
+    result.area = dx * dy;
+    result.linear = 2 * (dx + dy);
+    if (third > 0) { result.height = third; result.volume = dx * dy * third; }
+    result.objectType = 'Sol / plafond mesuré';
+  } else if (type === 'linear') {
+    result.length = diagonal;
+    result.linear = diagonal;
+    result.objectType = 'Linéaire mesuré';
+  } else {
+    result.length = dx;
+    result.width = dy;
+    result.height = third;
+    result.area = dx * dy;
+    result.linear = 2 * (dx + dy);
+    result.volume = third > 0 ? dx * dy * third : 0;
+    result.objectType = 'Pièce mesurée';
+  }
+  state.liveMeter.result = result;
+  state.liveMeter.source = 'calibration';
+  updateLiveHud();
+  drawLiveOverlay();
+  showLiveHelp('Mesure calculée. Vous pouvez l’ajouter au métré ou capturer la photo.');
+  setLiveStatus('Mesure calibrée disponible', 'ok');
+}
+
+function handleLiveOverlayPointer(event) {
+  if (!state.liveMeter.interaction) return;
+  const canvas = document.getElementById('camera-live-overlay');
+  const rect = canvas.getBoundingClientRect();
+  const point = { x:event.clientX-rect.left, y:event.clientY-rect.top };
+  state.liveMeter.points.push(point);
+  if (state.liveMeter.points.length > 2) state.liveMeter.points = [point];
+  drawLiveOverlay();
+
+  if (state.liveMeter.points.length === 2 && state.liveMeter.interaction === 'calibrate') {
+    const px = pointDistance(state.liveMeter.points[0], state.liveMeter.points[1]);
+    if (px < 20) {
+      state.liveMeter.points = [];
+      drawLiveOverlay();
+      showLiveHelp('Les 2 points sont trop proches. Recommencez.');
+      return;
+    }
+    state.liveMeter.pixelsPerMeter = px / state.liveMeter.referenceMeters;
+    state.liveMeter.points = [];
+    state.liveMeter.interaction = '';
+    drawLiveOverlay();
+    showLiveHelp('Calibration terminée. Appuyez sur « Mesurer zone ».');
+    setLiveStatus(`Calibré avec ${state.liveMeter.referenceMeters.toFixed(2).replace('.',',')} m`, 'ok');
+  } else if (state.liveMeter.points.length === 2 && state.liveMeter.interaction === 'zone') {
+    computeManualMeasurement();
+    state.liveMeter.interaction = '';
+  }
+}
+
+async function analyzeLiveFrame() {
+  if (!state.liveMeter.enabled || state.liveMeter.analyzing || !state.stream) return;
+  if (!['photo-gen','photo-verify'].includes(state.cameraTarget)) return;
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  if (!video?.videoWidth || !video?.videoHeight) return;
+
+  state.liveMeter.analyzing = true;
+  try {
+    const maxW = 960;
+    const scale = Math.min(1, maxW / video.videoWidth);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+    const imageBase64 = canvas.toDataURL('image/jpeg', .72).split(',')[1];
+    const payload = {
+      imageBase64,
+      measureType: document.getElementById('live-measure-type')?.value || 'wall',
+      referenceMeters: Number(document.getElementById('live-reference-m')?.value) || null,
+      thirdDimension: Number(document.getElementById('live-third-dimension')?.value) || null
+    };
+    const response = await fetch('/api/live-meter', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const result = normalizeLiveAnalysis(data);
+    const hasMeasure = result.area > 0 || result.linear > 0 || result.volume > 0 || result.length > 0;
+    if (hasMeasure) {
+      state.liveMeter.result = result;
+      state.liveMeter.source = 'ia';
+      state.liveMeter.apiAvailable = true;
+      updateLiveHud();
+      drawLiveOverlay();
+      setLiveStatus(result.objectType ? `IA Live · ${result.objectType}` : 'IA Live active', 'ok');
+    } else {
+      setLiveStatus('IA Live : cadrage / échelle à confirmer', 'pending');
+    }
+  } catch (error) {
+    state.liveMeter.apiAvailable = false;
+    const now = Date.now();
+    if (now - state.liveMeter.lastErrorAt > 5000) {
+      state.liveMeter.lastErrorAt = now;
+      setLiveStatus('IA Live non connectée · utilisez la calibration', 'error');
+      showLiveHelp('Le frontend est prêt pour /api/live-meter. En attendant, entrez une longueur connue puis utilisez « Calibrer ».');
+    }
+  } finally {
+    state.liveMeter.analyzing = false;
+  }
+}
+
+function startLiveAnalysisLoop() {
+  stopLiveAnalysisLoop();
+  if (!state.liveMeter.enabled) return;
+  analyzeLiveFrame();
+  state.liveMeter.timer = setInterval(analyzeLiveFrame, 1600);
+}
+
+function stopLiveAnalysisLoop() {
+  if (state.liveMeter.timer) {
+    clearInterval(state.liveMeter.timer);
+    state.liveMeter.timer = null;
+  }
+}
+
+function toggleLiveAnalysis() {
+  state.liveMeter.enabled = !state.liveMeter.enabled;
+  const btn = document.getElementById('live-auto-btn');
+  if (btn) {
+    btn.textContent = `IA Live : ${state.liveMeter.enabled ? 'ON' : 'OFF'}`;
+    btn.classList.toggle('active', state.liveMeter.enabled);
+  }
+  if (state.liveMeter.enabled) {
+    setLiveStatus('Connexion au moteur de mesure…', 'pending');
+    startLiveAnalysisLoop();
+  } else {
+    stopLiveAnalysisLoop();
+    setLiveStatus(state.liveMeter.pixelsPerMeter > 0 ? 'Mode calibration manuelle' : 'IA Live désactivée', 'pending');
+  }
+}
+
+function liveResultToMeterLine() {
+  const r = state.liveMeter.result;
+  if (!r) return null;
+  const type = document.getElementById('live-measure-type')?.value || 'wall';
+  let calcType = 'direct_m2';
+  let directQty = r.area || 0;
+  if (type === 'wall' && r.length > 0 && r.height > 0) calcType = 'wall_m2';
+  else if (type === 'floor' && r.length > 0 && r.width > 0) calcType = 'floor_m2';
+  else if (type === 'linear') { calcType = 'linear'; directQty = 0; }
+  else if (type === 'room' && r.length > 0 && r.width > 0 && r.height > 0) calcType = 'volume_m3';
+
+  const line = normalizeEstimateItem({
+    name: r.objectType || 'Métré live',
+    lot:'Lot non classé',
+    status: state.liveMeter.source === 'ia' ? 'Estimé par IA' : 'À vérifier',
+    calcType,
+    length:r.length || r.linear || 0,
+    width:r.width || 0,
+    height:r.height || 0,
+    directQty,
+    pricePerUnit:0,
+    priceSource:'manual'
+  }, getMeterLines().length);
+
+  const bpuMatch = findBestBpuMatch(line.name);
+  if (bpuMatch) applyBpuToLine(line, bpuMatch, true);
+  return line;
+}
+
+function addLiveMeasureToEstimate(closeAfter = false) {
+  const line = liveResultToMeterLine();
+  if (!line) {
+    alert('Aucune mesure exploitable n’est disponible.');
+    return;
+  }
+  getMeterLines().push(line);
+  state.liveMeter.addedToMeter = true;
+  const add = document.getElementById('live-add-btn');
+  if (add) add.textContent = '✓ Ajouté au métré';
+  if (document.getElementById('generate-results')?.classList.contains('show')) renderMeterLines();
+  if (closeAfter) closeCamera();
+}
+
 async function openCamera(target) {
   state.cameraTarget = target;
   try {
     const modal = document.getElementById('camera-modal');
     const video = document.getElementById('camera-video');
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } },
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
       audio: false
     });
     state.stream = stream;
     video.srcObject = stream;
     modal.classList.add('active');
+    resetLiveMeterState();
+
+    const liveUi = ['photo-gen','photo-verify'].includes(target);
+    document.getElementById('camera-live-hud')?.classList.toggle('live-hidden', !liveUi);
+    document.getElementById('camera-live-panel')?.classList.toggle('live-hidden', !liveUi);
+    document.getElementById('camera-live-overlay')?.classList.toggle('live-hidden', !liveUi);
+
+    await video.play().catch(()=>{});
+    resizeLiveOverlay();
+    if (liveUi) {
+      setLiveStatus('Connexion au moteur de mesure…', 'pending');
+      startLiveAnalysisLoop();
+    } else {
+      stopLiveAnalysisLoop();
+    }
   } catch (error) {
     console.error('Camera error:', error);
     alert("Impossible d'accéder à la caméra. Vérifiez les permissions de votre navigateur.");
@@ -1448,11 +2093,13 @@ async function openCamera(target) {
 function closeCamera() {
   const modal = document.getElementById('camera-modal');
   const video = document.getElementById('camera-video');
+  stopLiveAnalysisLoop();
+  showLiveHelp('');
   if (state.stream) {
     state.stream.getTracks().forEach(track => track.stop());
     state.stream = null;
   }
-  video.srcObject = null;
+  if (video) video.srcObject = null;
   modal.classList.remove('active');
 }
 
@@ -1482,6 +2129,7 @@ function capturePhoto() {
     state.generate.photoName = fileName;
     showSelectedFile('photo-gen-name', fileName);
     showPreview('photo-gen-preview', 'photo-gen-preview-wrap', photoData);
+    if (state.liveMeter.result && !state.liveMeter.addedToMeter) addLiveMeasureToEstimate(false);
   }
   closeCamera();
 }
@@ -2735,8 +3383,34 @@ function initFeatureModules() {
   });
 }
 
+function initLiveMeterUI() {
+  const overlay = document.getElementById('camera-live-overlay');
+  overlay?.addEventListener('pointerdown', handleLiveOverlayPointer);
+  document.getElementById('live-auto-btn')?.addEventListener('click', toggleLiveAnalysis);
+  document.getElementById('live-calibrate-btn')?.addEventListener('click', () => setLiveInteraction('calibrate'));
+  document.getElementById('live-zone-btn')?.addEventListener('click', () => setLiveInteraction('zone'));
+  document.getElementById('live-add-btn')?.addEventListener('click', () => addLiveMeasureToEstimate(false));
+  document.getElementById('live-measure-type')?.addEventListener('change', () => {
+    if (state.liveMeter.enabled) analyzeLiveFrame();
+    if (state.liveMeter.source === 'calibration' && state.liveMeter.points.length >= 2) computeManualMeasurement();
+  });
+  document.getElementById('live-third-dimension')?.addEventListener('input', () => {
+    if (state.liveMeter.source === 'calibration' && state.liveMeter.result) {
+      // Recompute volume using currently measured planar dimensions.
+      const r = state.liveMeter.result;
+      const third = Math.max(0, Number(document.getElementById('live-third-dimension')?.value) || 0);
+      const type = document.getElementById('live-measure-type')?.value || 'wall';
+      if (type === 'wall') { r.width = third; r.volume = r.length * r.height * third; }
+      if (type === 'floor' || type === 'room') { r.height = third; r.volume = r.length * r.width * third; }
+      updateLiveHud();
+    }
+  });
+  window.addEventListener('resize', () => { resizeLiveOverlay(); drawLiveOverlay(); });
+}
+
 initBpuUI();
 initFeatureModules();
+initLiveMeterUI();
 
 </script>
 </body>
